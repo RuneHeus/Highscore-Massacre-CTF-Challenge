@@ -28,7 +28,7 @@ let obstacleDistance = 500;
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
-
+  ctx.imageSmoothingEnabled = false;
   const width = canvas.width;
   const height = canvas.height;
 
@@ -245,37 +245,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function drawBackground(delta) {
     if (!groundSprite.complete || groundSprite.width === 0) return;
 
-    if (gameState !== "running") {
-      // Alleen tekenen, NIET bewegen
-      const spriteWidth = groundSprite.width;
-      for (let x = groundOffsetX; x < width; x += spriteWidth) {
-        ctx.drawImage(
-          groundSprite,
-          x,
-          ground.y,
-          spriteWidth,
-          ground.height
-        );
-      }
-      return;
+    if (gameState === "running") {
+      const deltaSeconds = delta / 1000;
+      groundOffsetX -= baseSpeed * deltaSeconds;
     }
-    
-    const deltaSeconds = delta / 1000;
-
-    groundOffsetX -= baseSpeed * deltaSeconds;
 
     const spriteWidth = groundSprite.width;
 
-    if (groundOffsetX <= -spriteWidth) {
+    let drawX = Math.floor(groundOffsetX);
+
+    if (drawX <= -spriteWidth) {
       groundOffsetX += spriteWidth;
+      drawX += spriteWidth;
     }
 
-    for (let x = groundOffsetX; x < width; x += spriteWidth) {
+    for (let x = drawX; x < width + spriteWidth; x += spriteWidth) {
       ctx.drawImage(
         groundSprite,
         x,
         ground.y,
-        spriteWidth,
+        spriteWidth + 1,
         ground.height
       );
     }
@@ -286,28 +275,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (gameState === "running") {
       const deltaSeconds = delta / 1000;
-
-      // Langzamer dan ground (parallax)
       backgroundOffsetX -= baseSpeed * 0.25 * deltaSeconds;
     }
 
     const spriteWidth = backgroundSprite.width;
     const spriteHeight = backgroundSprite.height;
 
-    // Verticaal schalen naar canvas hoogte
-    const scaleY = height / spriteHeight;
-    const drawWidth = spriteWidth * scaleY;
+    const scale = height / spriteHeight;
+    const drawWidth = Math.ceil(spriteWidth * scale);
+
+    // 🔑 afronden
+    backgroundOffsetX = Math.floor(backgroundOffsetX);
 
     if (backgroundOffsetX <= -drawWidth) {
       backgroundOffsetX += drawWidth;
     }
 
-    for (let x = backgroundOffsetX; x < width; x += drawWidth) {
+    for (let x = backgroundOffsetX; x < width + drawWidth; x += drawWidth) {
       ctx.drawImage(
         backgroundSprite,
         x,
         0,
-        drawWidth,
+        drawWidth + 1,
         height
       );
     }
