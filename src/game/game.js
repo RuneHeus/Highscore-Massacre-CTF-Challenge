@@ -15,15 +15,88 @@ export function initGame(canvas) {
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
 
-  const ground = {
-    y: canvas.height - 96,
-    height: 96
-  };
+  const BASE_WIDTH = 800;
+  const BASE_HEIGHT = 400;
 
-  const player = createPlayer(1.8, ground.y);
+  let scale = 1;
+  let ground = { y: 0, height: 0 };
+  let player = null;
+
+  function resizeCanvas() {
+    const maxWidth = window.innerWidth * 0.8;
+    const maxHeight = window.innerHeight * 0.6;
+    const aspectRatio = BASE_WIDTH / BASE_HEIGHT;
+
+    let newWidth = maxWidth;
+    let newHeight = newWidth / aspectRatio;
+
+    if (newHeight > maxHeight) {
+      newHeight = maxHeight;
+      newWidth = newHeight * aspectRatio;
+    }
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    // Update scale and recreate elements
+    scale = canvas.width / BASE_WIDTH;
+    ground = {
+      y: canvas.height - 96 * scale,
+      height: 96 * scale
+    };
+
+    if (player) {
+      player.width = 80 * scale;
+      player.height = 120 * scale;
+      player.hbOffsetX = (player.width - 56 * scale) / 2;
+      player.hbWidth = 56 * scale;
+      player.hbHeight = 117 * scale;
+      player.y = ground.y - player.height;
+    }
+
+    // Scale existing obstacles
+    state.obstacles.forEach(obs => {
+      if (obs.type === "campfire") {
+        obs.width = 150 * 0.45 * scale;
+        obs.height = 120 * 0.45 * scale;
+        obs.hbOffsetX = obs.width * 0.25;
+        obs.hbOffsetY = obs.height * 0.20;
+        obs.hbWidth = obs.width * 0.50;
+        obs.hbHeight = obs.height * 0.80;
+      } else if (obs.type === "tombstone") {
+        obs.width = 48 * scale;
+        obs.height = 80 * scale;
+        obs.hbOffsetX = obs.width * 0.25;
+        obs.hbOffsetY = obs.height * 0.20;
+        obs.hbWidth = obs.width * 0.50;
+        obs.hbHeight = obs.height * 0.80;
+      }
+      obs.y = ground.y - obs.height;
+    });
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  player = createPlayer(2, ground.y);
 
   // INPUT
   setupInput(state, player, resetGame);
+
+  function render(ctx, canvas, player, state, ground, delta) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawParallaxBackground(ctx, assets, canvas, state, delta);
+    drawGround(ctx, assets, canvas, state, ground, delta);
+    drawObstacles(ctx, assets, state.obstacles, delta);
+
+    const frame = {
+      col: player.frameIndex % 5,
+      row: Math.floor(player.frameIndex / 5)
+    };
+    drawPlayer(ctx, assets, frame, player);
+    drawUI(ctx, canvas, state, assets, scale);
+  }
 
   function resetGame() {
     state.score = 0;
@@ -54,7 +127,7 @@ export function initGame(canvas) {
     if (state.gameState === "running") {
       updatePlayer(player, delta, ground, 1400);
       updatePlayerAnimation(player, delta);
-      updateObstacles(state.obstacles, state.baseSpeed, delta, state, canvas.width, ground.y);
+      updateObstacles(state.obstacles, state.baseSpeed, delta, state, canvas.width, ground.y, scale);
 
       for (const obs of state.obstacles) {
         if (checkCollision(player, obs)) {
@@ -69,23 +142,9 @@ export function initGame(canvas) {
       }
     }
 
-    render(ctx, canvas, player, state, ground, delta);
+    render(ctx, canvas, player, state, ground, delta, scale);
     requestAnimationFrame(loop);
   }
+
   requestAnimationFrame(loop);
-}
-
-function render(ctx, canvas, player, state, ground, delta) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawParallaxBackground(ctx, assets, canvas, state, delta);
-  drawGround(ctx, assets, canvas, state, ground, delta);
-  drawObstacles(ctx, assets, state.obstacles, delta);
-
-  const frame = {
-    col: player.frameIndex % 5,
-    row: Math.floor(player.frameIndex / 5)
-  };
-  drawPlayer(ctx, assets, frame, player);
-  drawUI(ctx, canvas, state, assets);
 }

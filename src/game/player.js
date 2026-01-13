@@ -1,10 +1,16 @@
 export function createPlayer(scale, groundY) {
   const height = 60 * scale;
+  const width = 40 * scale;
   return {
     x: 80,
     y: groundY - height,
-    width: 40 * scale,
+    width: width,
     height: height,
+    // Hitbox voor nauwkeurige collision detection
+    hbOffsetX: (width - 56) / 2,  // Centreer horizontaal
+    hbOffsetY: 0,  // Vanaf de bovenkant
+    hbWidth: 56,
+    hbHeight: 117,
     vy: 0,
     grounded: true,
     jumping: false,
@@ -16,7 +22,7 @@ export function createPlayer(scale, groundY) {
 }
 
 export function updatePlayerAnimation(player, delta) {
-  player.frameTimer += delta * 1000; // delta is in seconds, convert to ms
+  player.frameTimer += delta * 1000;
   if (player.frameTimer >= 100) {
     player.frameIndex = (player.frameIndex + 1) % 7;
     player.frameTimer = 0;

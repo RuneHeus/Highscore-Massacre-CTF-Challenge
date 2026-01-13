@@ -1,24 +1,36 @@
 export function checkCollision(a, b) {
-  if (b.type === "tombstone") {
-    // Use hitbox for tombstones
-    const hbX = b.x + b.hbOffsetX;
-    const hbY = b.y + b.hbOffsetY;
-    const hbWidth = b.hbWidth;
-    const hbHeight = b.hbHeight;
-
-    return !(
-      a.x + a.width < hbX ||
-      a.x > hbX + hbWidth ||
-      a.y + a.height < hbY ||
-      a.y > hbY + hbHeight
-    );
+  // Determine hitbox for a (player)
+  let aX, aY, aWidth, aHeight;
+  if (a.hbOffsetX !== undefined) {
+    aX = a.x + a.hbOffsetX;
+    aY = a.y + a.hbOffsetY;
+    aWidth = a.hbWidth;
+    aHeight = a.hbHeight;
   } else {
-    // Default AABB for other obstacles
-    return !(
-      a.x + a.width < b.x ||
-      a.x > b.x + b.width ||
-      a.y + a.height < b.y ||
-      a.y > b.y + b.height
-    );
+    aX = a.x;
+    aY = a.y;
+    aWidth = a.width;
+    aHeight = a.height;
   }
+
+  // Determine hitbox for b (obstacle)
+  let bX, bY, bWidth, bHeight;
+  if (b.hbOffsetX !== undefined) {
+    bX = b.x + b.hbOffsetX;
+    bY = b.y + b.hbOffsetY;
+    bWidth = b.hbWidth;
+    bHeight = b.hbHeight;
+  } else {
+    bX = b.x;
+    bY = b.y;
+    bWidth = b.width;
+    bHeight = b.height;
+  }
+
+  return !(
+    aX + aWidth < bX ||
+    aX > bX + bWidth ||
+    aY + aHeight < bY ||
+    aY > bY + bHeight
+  );
 }

@@ -30,5 +30,15 @@ export function drawObstacles(ctx, assets, obstacles, delta) {
         obs.height
       );
     }
+
+    // Draw collision box
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      Math.round(obs.x + obs.hbOffsetX),
+      Math.round(obs.y + obs.hbOffsetY),
+      obs.hbWidth,
+      obs.hbHeight
+    );
   });
 }

@@ -8,20 +8,23 @@ export function drawGround(ctx, assets, canvas, state, ground, delta) {
   }
 
   const spriteWidth = sprite.width;
+  const scale = ground.height / 96; // Assuming base ground height is 96
+  const drawHeight = ground.height;
+
   let drawX = Math.floor(state.groundOffsetX);
 
-  if (drawX <= -spriteWidth) {
-    state.groundOffsetX += spriteWidth;
-    drawX += spriteWidth;
+  if (drawX <= -spriteWidth * scale) {
+    state.groundOffsetX += spriteWidth * scale;
+    drawX += spriteWidth * scale;
   }
 
-  for (let x = drawX; x < canvas.width + spriteWidth; x += spriteWidth) {
+  for (let x = drawX; x < canvas.width + spriteWidth * scale; x += spriteWidth * scale) {
     ctx.drawImage(
       sprite,
       x,
       ground.y,
-      spriteWidth + 1,
-      ground.height
+      spriteWidth * scale + 1,
+      drawHeight
     );
   }
 }
