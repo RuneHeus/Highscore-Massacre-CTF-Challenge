@@ -6,7 +6,7 @@ import { checkCollision } from "./collision";
 
 import * as assets from "../assets";
 
-import { drawGround, drawParallaxBackground } from "./render/backgroundRender";
+import { drawGround, drawParallaxBackground, drawJason } from "./render/backgroundRender";
 import { drawPlayer } from "./render/playerRender";
 import { drawObstacles } from "./render/obstacleRender";
 import { drawUI } from "./render/uiRender";
@@ -95,6 +95,7 @@ export function initGame(canvas) {
       row: Math.floor(player.frameIndex / 5)
     };
     drawPlayer(ctx, assets, frame, player);
+    drawJason(ctx, assets, canvas, player, ground, scale, delta);
     drawUI(ctx, canvas, state, assets, scale);
   }
 

@@ -60,3 +60,47 @@ export function drawParallaxBackground(ctx, assets, canvas, state, delta) {
     );
   }
 }
+
+export function drawJason(ctx, assets, canvas, player, ground, scale, delta) {
+  const sprite = assets.jasonSprite;
+  if (!sprite.complete || sprite.width === 0) return;
+
+  const FRAMES = [
+    { x:   0, y: 0, w: 77,  h: 109 },
+    { x:  82, y: 0, w: 82,  h: 109 },
+    { x: 184, y: 0, w: 82,  h: 109 },
+    { x: 281, y: 0, w: 68,  h: 109 },
+    { x: 356, y: 0, w: 72,  h: 109 },
+    { x: 436, y: 0, w: 81,  h: 109 },
+    { x: 527, y: 0, w: 81,  h: 109 },
+  ];
+
+  // Animation logic for Jason
+  if (!drawJason.frameIndex) drawJason.frameIndex = 0;
+  if (!drawJason.frameTimer) drawJason.frameTimer = 0;
+
+  drawJason.frameTimer += delta * 1000; // delta is in seconds, convert to ms
+  if (drawJason.frameTimer >= 100) {
+    drawJason.frameIndex = (drawJason.frameIndex + 1) % FRAMES.length;
+    drawJason.frameTimer = 0;
+  }
+
+  const frame = FRAMES[drawJason.frameIndex];
+
+  const jasonWidth = frame.w * scale;
+  const jasonHeight = frame.h * scale;
+  const jasonX = player.x - jasonWidth - 50; // Position left of player with some offset
+  const jasonY = ground.y - jasonHeight;
+
+  ctx.drawImage(
+    sprite,
+    frame.x,
+    frame.y,
+    frame.w,
+    frame.h,
+    jasonX,
+    jasonY,
+    jasonWidth,
+    jasonHeight
+  );
+}

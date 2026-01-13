@@ -15,3 +15,6 @@ groundSprite.src = "/media/ground.jpg";
 
 export const backgroundSprite = new Image();
 backgroundSprite.src = "/media/background.png";
+
+export const jasonSprite = new Image();
+jasonSprite.src = "/media/jason_pixel.png";

@@ -2,7 +2,7 @@ export function createPlayer(scale, groundY) {
   const height = 60 * scale;
   const width = 40 * scale;
   return {
-    x: 80,
+    x: 250,
     y: groundY - height,
     width: width,
     height: height,
