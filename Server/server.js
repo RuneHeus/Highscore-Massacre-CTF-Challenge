@@ -1,6 +1,7 @@
 const express = require("express");
-const fs = require("fs");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const PORT = 3000;
@@ -8,23 +9,32 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Pad naar opslag
-const SCORE_FILE = "./scores.json";
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self'",
+      "connect-src 'self'",
+    ].join("; ")
+  );
+  next();
+});
 
-// Helper: scores laden
+const SCORE_FILE = path.join(__dirname, "../scores.json");
+
 function loadScores() {
-  if (!fs.existsSync(SCORE_FILE)) {
-    return [];
-  }
-  return JSON.parse(fs.readFileSync(SCORE_FILE));
+  if (!fs.existsSync(SCORE_FILE)) return [];
+  return JSON.parse(fs.readFileSync(SCORE_FILE, "utf8"));
 }
 
-// Helper: scores opslaan
 function saveScores(scores) {
   fs.writeFileSync(SCORE_FILE, JSON.stringify(scores, null, 2));
 }
 
-// Score opslaan
 app.post("/score", (req, res) => {
   const { name, score } = req.body;
 
@@ -33,26 +43,24 @@ app.post("/score", (req, res) => {
   }
 
   const scores = loadScores();
+  scores.push({ name, score, date: Date.now() });
 
-  scores.push({
-    name,
-    score,
-    date: Date.now()
-  });
-
-  // Sorteer hoogste score eerst
   scores.sort((a, b) => b.score - a.score);
-
-  // Beperk tot top 10
   saveScores(scores.slice(0, 10));
 
   res.json({ success: true });
 });
 
-// Leaderboard ophalen
 app.get("/leaderboard", (req, res) => {
-  const scores = loadScores();
-  res.json(scores);
+  res.json(loadScores());
+});
+
+const DIST_PATH = path.join(__dirname, "../dist");
+
+app.use(express.static(DIST_PATH));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(DIST_PATH, "index.html"));
 });
 
 app.listen(PORT, () => {
