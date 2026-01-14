@@ -5,11 +5,17 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+COPY src ./src
+COPY server ./server
+COPY prisma ./prisma
+COPY public ./public
+COPY vite.config.js ./
+COPY index.html ./
 
 RUN npm run build
 RUN npx prisma generate
 
-EXPOSE 3000
+USER node
 
+EXPOSE 3000
 CMD ["npm", "run", "server"]

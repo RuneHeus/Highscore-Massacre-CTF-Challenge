@@ -1,5 +1,5 @@
 export function spawnObstacle(obstacles, width, groundY, scale = 1) {
-  const isCampfire = Math.random() < 0.6;
+  const isCampfire = Math.random() < 0.6; // NOSONAR - gameplay randomness, not security-related
 
   if (isCampfire) {
     const CAMPFIRE_FRAME_WIDTH = 150;
@@ -64,7 +64,6 @@ export function updateObstacles(obstacles, speed, deltaSeconds, state, canvasWid
   if (state.distanceSinceLastObstacle >= state.obstacleDistance) {
     spawnObstacle(obstacles, canvasWidth, groundY, scale);
     state.distanceSinceLastObstacle = 0;
-
-    state.obstacleDistance = (450 + Math.random() * 300) * scale;
+    state.obstacleDistance = (450 + Math.random() * 300) * scale; // NOSONAR - gameplay randomness, not security-related
   }
 }

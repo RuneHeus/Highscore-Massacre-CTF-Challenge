@@ -17,9 +17,11 @@ export function drawUI(ctx, canvas, state, assets, scale) {
   }
 
   if (state.gameState === "gameover") {
-    if (state.showSaveOverlay) {  
+    if (state.showSaveOverlay) { 
+      console.log("Drawing save score screen");
       drawSaveScoreScreen(ctx, state, canvas, scale);
     } else {
+      console.log("Drawing game over screen");
       drawGameOverScreen(ctx, state, canvas, scale);
     }
   }
@@ -46,7 +48,7 @@ function drawStartScreen(ctx, canvas, assets, scale) {
   ctx.fillText("Druk op SPATIE om te starten", canvas.width/2, canvas.height/2 + 185 * scale);
 }
 
-function drawGameOverScreen(ctx, state, canvas) {
+function drawGameOverScreen(ctx, state, canvas, scale) {
   ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 

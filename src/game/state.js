@@ -10,5 +10,6 @@ export const state = {
   backgroundOffsetX: 0,
   distanceSinceLastObstacle: 0,
   obstacleDistance: 500,
-  showSaveOverlay: false
+  showSaveOverlay: false,
+  playerName: ""
 };

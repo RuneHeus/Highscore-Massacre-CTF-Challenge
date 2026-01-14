@@ -1,0 +1,24 @@
+# Node
+node_modules
+npm-debug.log
+
+# Git
+.git
+.gitignore
+
+# Env
+.env
+.env.*
+
+# Build output (we build inside Docker)
+dist
+
+# Docker / tooling
+docker-compose.yml
+Dockerfile
+README.md
+
+# OS / editor
+.DS_Store
+.vscode
+.idea

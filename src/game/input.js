@@ -1,4 +1,4 @@
-function handleSaveInput(e) {
+function handleSaveInput(e, state) {
   if (!state.showSaveOverlay) return false;
 
   if (e.key === "Backspace") {
@@ -19,6 +19,30 @@ function handleSaveInput(e) {
   return true;
 }
 
+async function submitScore() {
+  const payload = {
+    name: state.playerName,
+    score: Math.floor(state.score),
+    gameId: 1
+  };
+
+  try {
+    await fetch("/score", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    state.showSaveOverlay = false;
+    state.gameState = "gameover";
+  } catch (err) {
+    console.error("Failed to submit score", err);
+  }
+}
+
+
 export function setupInput(state, player, resetGame) {
   let jumpHeld = false;
   let jumpHoldTime = 0;
@@ -29,7 +53,7 @@ export function setupInput(state, player, resetGame) {
   document.addEventListener("keydown", (e) => {
 
     if (state.showSaveOverlay) {
-      const handled = handleSaveInput(e);
+      const handled = handleSaveInput(e, state);
       if (handled) {
         e.preventDefault();
         return;
