@@ -7,7 +7,7 @@ function handleSaveInput(e, state) {
   }
 
   if (e.key === "Enter") {
-    submitScore();
+    submitScore(state);
     return true;
   }
 
@@ -19,7 +19,7 @@ function handleSaveInput(e, state) {
   return true;
 }
 
-async function submitScore() {
+async function submitScore(state) {
   const payload = {
     name: state.playerName,
     score: Math.floor(state.score),
