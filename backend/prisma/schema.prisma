@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  game_id            Int           @id @default(autoincrement())
+  title              String
+  description        String
+  instructions       String
+  thumbnail_url      String
+  is_active           Boolean       @default(true)
+  created_date       DateTime      @default(now())
+  total_plays        Int           @default(0)
+  all_time_high_score Int           @default(0)
+
+  sessions           Game_session[]
+  leaderboard        Leaderboard_entry[]
+}
+
+model Game_session {
+  session_id           Int       @id @default(autoincrement())
+  game_id              Int
+  start_time           DateTime
+  end_time             DateTime?
+  final_score          Int
+  time_played_seconds  Int
+  status               String
+  ip_address           String
+
+  game                 Game      @relation(fields: [game_id], references: [game_id])
+  leaderboard_entry    Leaderboard_entry?
+}
+
+model Leaderboard_entry {
+  entry_id       Int      @id @default(autoincrement())
+  game_id        Int
+  session_id     Int      @unique
+  player_name    String
+  score          Int
+  achieved_date  DateTime @default(now())
+  rank_position  Int
+
+  game           Game         @relation(fields: [game_id], references: [game_id])
+  session        Game_session @relation(fields: [session_id], references: [session_id])
+}

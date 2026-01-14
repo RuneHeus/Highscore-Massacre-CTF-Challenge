@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: game
+      POSTGRES_PASSWORD: game
+      POSTGRES_DB: game_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://game:game@db:5432/game_db
+    depends_on:
+      - db
+    command: >
+      sh -c "
+      npx prisma migrate deploy &&
+      node prisma/seed.js &&
+      npm run dev
+      "
+
+volumes:
+  db_data:
