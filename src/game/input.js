@@ -1,3 +1,24 @@
+function handleSaveInput(e) {
+  if (!state.showSaveOverlay) return false;
+
+  if (e.key === "Backspace") {
+    state.playerName = state.playerName.slice(0, -1);
+    return true;
+  }
+
+  if (e.key === "Enter") {
+    submitScore();
+    return true;
+  }
+
+  if (e.key.length === 1 && state.playerName.length < 10) {
+    state.playerName += e.key.toUpperCase();
+    return true;
+  }
+
+  return true;
+}
+
 export function setupInput(state, player, resetGame) {
   let jumpHeld = false;
   let jumpHoldTime = 0;
@@ -6,6 +27,15 @@ export function setupInput(state, player, resetGame) {
   const DROP_VELOCITY = -120;
 
   document.addEventListener("keydown", (e) => {
+
+    if (state.showSaveOverlay) {
+      const handled = handleSaveInput(e);
+      if (handled) {
+        e.preventDefault();
+        return;
+      }
+    }
+
     if (e.code === "Space") {
       if (state.gameState === "start") {
         resetGame();
@@ -27,7 +57,7 @@ export function setupInput(state, player, resetGame) {
     }
 
     if (e.key === "r" || e.key === "R") {
-      if (state.gameState === "gameover") {
+      if (state.gameState === "gameover" && !state.showSaveOverlay) {
         resetGame();
         state.gameState = "running";
       }

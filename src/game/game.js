@@ -133,6 +133,9 @@ export function initGame(canvas) {
       for (const obs of state.obstacles) {
         if (checkCollision(player, obs)) {
           state.gameState = "gameover";
+          if(score.score >= 50){
+            state.showSaveOverlay = true;
+          }
           break;
         }
       }

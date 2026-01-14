@@ -1,0 +1,58 @@
+# ===============================
+# Node / Vite
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===============================
+# Build output
+# ===============================
+dist/
+
+# ===============================
+# Environment variables
+# ===============================
+.env
+.env.*
+!.env.example
+
+# ===============================
+# Prisma
+# ===============================
+# Prisma generates native binaries in node_modules
+# (node_modules already ignored, but explicit for clarity)
+.prisma/
+
+# ===============================
+# Docker
+# ===============================
+.docker/
+docker-data/
+docker-volume/
+**/postgres-data/
+**/pgdata/
+
+# ===============================
+# OS / Editor
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===============================
+# Git
+# ===============================
+.git/
+.gitignore~
+
+# ===============================
+# Temporary / Misc
+# ===============================
+*.log
+*.tmp
+*.swp
+*.bak

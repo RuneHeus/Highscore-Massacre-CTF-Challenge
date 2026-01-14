@@ -17,7 +17,11 @@ export function drawUI(ctx, canvas, state, assets, scale) {
   }
 
   if (state.gameState === "gameover") {
-    drawGameOverScreen(ctx, state, canvas, scale);
+    if (state.showSaveOverlay) {  
+      drawSaveScoreScreen(ctx, state, canvas, scale);
+    } else {
+      drawGameOverScreen(ctx, state, canvas, scale);
+    }
   }
 }
 
@@ -70,5 +74,54 @@ function drawGameOverScreen(ctx, state, canvas) {
     "Druk op R om opnieuw te spelen",
     canvas.width / 2,
     canvas.height / 2 + 70
+  );
+}
+
+function drawSaveScoreScreen(ctx, state, canvas, scale) {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const boxW = 360 * scale;
+  const boxH = 260 * scale;
+  const x = canvas.width / 2 - boxW / 2;
+  const y = canvas.height / 2 - boxH / 2;
+
+  ctx.strokeStyle = "#ff0000";
+  ctx.lineWidth = 4 * scale;
+  ctx.strokeRect(x, y, boxW, boxH);
+
+  ctx.textAlign = "center";
+
+  ctx.fillStyle = "#ff0000";
+  ctx.font = `${28 * scale}px system-ui`;
+  ctx.fillText("SAVE SCORE", canvas.width / 2, y + 40 * scale);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `${20 * scale}px system-ui`;
+  ctx.fillText(
+    `Score: ${Math.floor(state.score)}`,
+    canvas.width / 2,
+    y + 90 * scale
+  );
+
+  ctx.font = `${16 * scale}px system-ui`;
+  ctx.fillText(
+    "Typ je naam en druk op ENTER",
+    canvas.width / 2,
+    y + 140 * scale
+  );
+
+  ctx.strokeStyle = "#ffffff";
+  ctx.strokeRect(
+    canvas.width / 2 - 100 * scale,
+    y + 160 * scale,
+    200 * scale,
+    30 * scale
+  );
+
+  ctx.fillText(
+    state.playerName || "_",
+    canvas.width / 2,
+    y + 182 * scale
   );
 }
