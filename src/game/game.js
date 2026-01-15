@@ -51,6 +51,7 @@ export function initGame(canvas) {
       player.hbOffsetX = (player.width - 56 * scale) / 2;
       player.hbWidth = 56 * scale;
       player.hbHeight = 117 * scale;
+      player.x = canvas.width * 0.3125;
       player.y = ground.y - player.height;
     }
 
@@ -78,7 +79,7 @@ export function initGame(canvas) {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  player = createPlayer(2, ground.y);
+  player = createPlayer(scale, ground.y, canvas.width);
 
   // INPUT
   setupInput(state, player, resetGame);
