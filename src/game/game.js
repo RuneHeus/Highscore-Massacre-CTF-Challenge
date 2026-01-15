@@ -129,7 +129,7 @@ export function initGame(canvas) {
     const delta = deltaMs / 1000;
 
     if (state.gameState === "running") {
-      updatePlayer(player, delta, ground, 1500, scale);
+      updatePlayer(player, delta, ground, 3500, scale);
       updatePlayerAnimation(player, delta);
       updateObstacles(state.obstacles, state.baseSpeed, delta, state, canvas.width, ground.y, scale);
 
@@ -137,7 +137,7 @@ export function initGame(canvas) {
         if (checkCollision(player, obs)) {
           state.gameState = "gameover";
           console.log("Game Over! Final Score:", Math.floor(state.score));
-          if(state.score >= 50){
+          if(state.score >= 500){
             state.showSaveOverlay = true;
           }
           break;
