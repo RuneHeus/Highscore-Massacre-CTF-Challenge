@@ -43,11 +43,11 @@ async function submitScore(state) {
 }
 
 
-export function setupInput(state, player, resetGame) {
+export function setupInput(state, player, resetGame, scale) {
   let jumpHeld = false;
   let jumpHoldTime = 0;
   const JUMP_CONTROL_TIME = 90;
-  const JUMP_VELOCITY = -450;
+  const JUMP_VELOCITY = -800 * scale;
   const DROP_VELOCITY = -120;
 
   document.addEventListener("keydown", (e) => {

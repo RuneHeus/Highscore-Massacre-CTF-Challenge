@@ -1,0 +1,4 @@
+- [ ] Edit src/game/input.js to increase JUMP_VELOCITY from -600 to -800 * scale
+- [ ] Edit src/game/game.js to decrease gravity from 2000 to 1500
+- [ ] Edit src/game/player.js to decrease MIN_JUMP_HEIGHT from 60 to 40 * scale
+- [ ] Test the game to ensure jump feels more aggressive and responsive

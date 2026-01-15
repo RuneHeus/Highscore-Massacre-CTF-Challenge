@@ -36,8 +36,8 @@ export function updatePlayerAnimation(player, delta) {
   };
 }
 
-export function updatePlayer(player, deltaSeconds, ground, gravity) {
-  const MIN_JUMP_HEIGHT = 60;
+export function updatePlayer(player, deltaSeconds, ground, gravity, scale) {
+  const MIN_JUMP_HEIGHT = 40 * scale;
   const DROP_VELOCITY = -120;
 
   // Gravity (altijd, Dino-style)
@@ -56,16 +56,6 @@ export function updatePlayer(player, deltaSeconds, ground, gravity) {
   }
 
   // Landing
-  if (player.y + player.height >= ground.y) {
-    player.y = ground.y - player.height;
-    player.vy = 0;
-    player.grounded = true;
-    player.jumping = false;
-  }
-
-  // Positie update
-  player.y += player.vy * deltaSeconds;
-
   if (player.y + player.height >= ground.y) {
     player.y = ground.y - player.height;
     player.vy = 0;

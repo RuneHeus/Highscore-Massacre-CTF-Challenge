@@ -84,7 +84,7 @@ export function initGame(canvas) {
   player = createPlayer(scale, ground.y, canvas.width);
 
   // INPUT
-  setupInput(state, player, resetGame);
+  setupInput(state, player, resetGame, scale);
 
   function render(ctx, canvas, player, state, ground, delta) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -129,7 +129,7 @@ export function initGame(canvas) {
     const delta = deltaMs / 1000;
 
     if (state.gameState === "running") {
-      updatePlayer(player, delta, ground, 1400);
+      updatePlayer(player, delta, ground, 1500, scale);
       updatePlayerAnimation(player, delta);
       updateObstacles(state.obstacles, state.baseSpeed, delta, state, canvas.width, ground.y, scale);
 
