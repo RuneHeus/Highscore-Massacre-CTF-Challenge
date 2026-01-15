@@ -2,7 +2,7 @@ export const state = {
   gameState: "start",
   score: 0,
   highScore: 0,
-  baseSpeed: 380,
+  baseSpeed: 450,
   speedIncrease: 5,
   lastTime: 0,
   obstacles: [],

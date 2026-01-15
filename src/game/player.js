@@ -1,16 +1,18 @@
-export function createPlayer(scale, groundY) {
-  const height = 60 * scale;
-  const width = 40 * scale;
+export function createPlayer(scale, groundY, canvasWidth) {
+  const height = 120 * scale;
+  const width = 80 * scale;
+  const hbWidth = 56 * scale;
+  const hbHeight = 117 * scale;
   return {
-    x: 250,
+    x: canvasWidth * 0.3125,
     y: groundY - height,
     width: width,
     height: height,
     // Hitbox voor nauwkeurige collision detection
-    hbOffsetX: (width - 56) / 2,  // Centreer horizontaal
+    hbOffsetX: (width - hbWidth) / 2,  // Centreer horizontaal
     hbOffsetY: 0,  // Vanaf de bovenkant
-    hbWidth: 56,
-    hbHeight: 117,
+    hbWidth: hbWidth,
+    hbHeight: hbHeight,
     vy: 0,
     grounded: true,
     jumping: false,

@@ -67,6 +67,8 @@ canvas {
     background: linear-gradient(to top, #050505, #101520);
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
     border: 2px solid rgba(255, 0, 0, 0.4);
+    width: 800px;
+    height: 400px;
 }
 
 /* ========== INFO ========== */

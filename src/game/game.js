@@ -37,6 +37,8 @@ export function initGame(canvas) {
 
     canvas.width = newWidth;
     canvas.height = newHeight;
+    canvas.style.width = canvas.width + 'px';
+    canvas.style.height = canvas.height + 'px';
 
     // Update scale and recreate elements
     scale = canvas.width / BASE_WIDTH;
@@ -102,7 +104,7 @@ export function initGame(canvas) {
 
   function resetGame() {
     state.score = 0;
-    state.baseSpeed = 380;
+    state.baseSpeed = 450 * scale;
     state.obstacles.length = 0;
     state.lastTime = 0;
     state.gameState = "running";
