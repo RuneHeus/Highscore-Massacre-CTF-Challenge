@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Run from Jason - Endless Runner</title>
+  <meta charset="UTF-8" />
+  <title>Run from Jason</title>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
+
 <body>
+
   <div class="jason-fixed">
     <img src="media/jason.png" alt="Jason Voorhees">
   </div>
 
-  <button id="leaderboard-btn">☠ LEADERBOARD</button>
+  <button id="leaderboard-btn">LEADERBOARD</button>
 
   <div id="leaderboard-modal" class="hidden">
     <div class="modal-content">
-      <h2>FRIDAY THE 13TH</h2>
-      <h3>TOP SURVIVORS</h3>
+
+      <div class="leaderboard-header">
+        <div class="leaderboard-title">TOP SURVIVORS</div>
+      </div>
 
       <div id="leaderboard-list"></div>
 
@@ -34,11 +39,10 @@
   </div>
 
   <div id="highscore-hint">
-    <div class="glitch-group" data-text="The person with the highest score leaves with something special...">
-    </div>
+    <div class="glitch-group" data-text="The person with the highest score leaves with something special..."></div>
   </div>
-
 
   <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>
