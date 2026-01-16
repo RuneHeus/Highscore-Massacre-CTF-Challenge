@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 });
 
 app.post("/score", async (req, res) => {
+  console.log("POST /score body:", req.body);
   try {
     const { name, score, gameId } = req.body;
 
@@ -37,7 +38,6 @@ app.post("/score", async (req, res) => {
       return res.status(400).json({ error: "Invalid data" });
     }
 
-    // 1. Maak game session
     const session = await prisma.game_session.create({
       data: {
         game_id: gameId,
@@ -50,29 +50,14 @@ app.post("/score", async (req, res) => {
       }
     });
 
-    // 2. Voeg leaderboard entry toe
     await prisma.leaderboard_entry.create({
       data: {
         game_id: gameId,
         session_id: session.session_id,
         player_name: name,
-        score: score,
-        rank_position: 0 // herberekend hieronder
+        score: score
       }
     });
-
-    // 3. Herbereken ranking
-    const entries = await prisma.leaderboard_entry.findMany({
-      where: { game_id: gameId },
-      orderBy: { score: "desc" }
-    });
-
-    for (let i = 0; i < entries.length; i++) {
-      await prisma.leaderboard_entry.update({
-        where: { entry_id: entries[i].entry_id },
-        data: { rank_position: i + 1 }
-      });
-    }
 
     res.json({ success: true });
   } catch (err) {
@@ -83,13 +68,23 @@ app.post("/score", async (req, res) => {
 
 
 app.get("/leaderboard/:gameId", async (req, res) => {
+  console.log("GET /leaderboard gameId:", req.params.gameId);
   const gameId = Number(req.params.gameId);
 
-  const leaderboard = await prisma.leaderboard_entry.findMany({
+  const entries = await prisma.leaderboard_entry.findMany({
     where: { game_id: gameId },
     orderBy: { score: "desc" },
-    take: 10
+    take: 5
   });
+
+  const leaderboard = entries.map((entry, index) => ({
+    rank: index + 1,
+    player_name: entry.player_name,
+    score: entry.score,
+    achieved_date: entry.achieved_date
+  }));
+
+  console.log("Leaderboard entries:", entries);
 
   res.json(leaderboard);
 });

@@ -37,14 +37,15 @@ model Game_session {
 }
 
 model Leaderboard_entry {
-  entry_id       Int      @id @default(autoincrement())
-  game_id        Int
-  session_id     Int      @unique
-  player_name    String
-  score          Int
-  achieved_date  DateTime @default(now())
-  rank_position  Int
+  entry_id      Int      @id @default(autoincrement())
+  game_id       Int
+  session_id    Int      @unique
+  player_name   String
+  score         Int
+  achieved_date DateTime @default(now())
 
-  game           Game         @relation(fields: [game_id], references: [game_id])
-  session        Game_session @relation(fields: [session_id], references: [session_id])
+  game          Game         @relation(fields: [game_id], references: [game_id])
+  session       Game_session @relation(fields: [session_id], references: [session_id])
+
+  @@index([game_id, score(sort: Desc)])
 }

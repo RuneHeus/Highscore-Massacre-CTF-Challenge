@@ -1,9 +1,28 @@
+@font-face {
+  font-family: "RetroPixel";
+  src: url("/fonts/retro_pixel.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+html,
+body {
+  font-family: "RetroPixel", monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+* {
+  font-family: inherit;
+}
+
 /* ========== RESET ========== */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ========== BODY ========== */
@@ -67,8 +86,6 @@ canvas {
     background: linear-gradient(to top, #050505, #101520);
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
     border: 2px solid rgba(255, 0, 0, 0.4);
-    width: 800px;
-    height: 400px;
 }
 
 /* ========== INFO ========== */
@@ -190,17 +207,20 @@ canvas {
   }
 }
 
-/* === HIGH SCORE BLOOD HINT (SYNCED) === */
-
 #highscore-hint {
   position: fixed;
-  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 999;
 
+  bottom: max(24px, env(safe-area-inset-bottom));
+  padding-bottom: 24px;
+  /* 🔑 altijd extra ruimte */
+
+  z-index: 999;
   text-align: center;
   pointer-events: none;
+
+  width: 100%;
 }
 
 /* === Glitch container === */
@@ -264,25 +284,27 @@ canvas {
   100% { opacity: 0.95; }
 }
 
-/* === Responsive === */
-@media (max-width: 768px) {
-  .glitch-group {
-    font-size: 18px;
-  }
-}
-
 .glitch-group {
   position: relative;
   font-family: "Courier New", monospace;
-  font-size: 28px;
-  letter-spacing: 2px;
+
+  font-size: clamp(14px, 4vw, 28px);
+  letter-spacing: clamp(0.5px, 0.3vw, 2px);
+  line-height: 1.4;
+
   color: #8b0000;
   text-shadow: 2px 2px 0 #330000;
   animation: flicker 2.4s infinite;
-  white-space: pre;
 
   text-align: center;
-  width: 100%;
+
+  /* 🔑 DIT IS DE OPLOSSING */
+  width: min(90vw, 720px);
+  margin: 0 auto;
+
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .glitch-group::before,
@@ -291,13 +313,20 @@ canvas {
   position: absolute;
   inset: 0;
 
-  white-space: pre;
-  text-align: center;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 100%;
+  height: 100%;
+
+  font-size: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+
+  white-space: normal;
+  text-align: center;
+
   opacity: 0.7;
   pointer-events: none;
-}
+} 

@@ -37,7 +37,7 @@ export function updatePlayerAnimation(player, delta) {
 }
 
 export function updatePlayer(player, deltaSeconds, ground, gravity, scale) {
-  const MIN_JUMP_HEIGHT = 40 * scale;
+  const MIN_JUMP_HEIGHT = 60 * scale;
   const DROP_VELOCITY = -120;
 
   // Gravity (altijd, Dino-style)

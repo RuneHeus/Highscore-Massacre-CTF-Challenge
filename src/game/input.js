@@ -47,7 +47,7 @@ export function setupInput(state, player, resetGame, scale) {
   let jumpHeld = false;
   let jumpHoldTime = 0;
   const JUMP_CONTROL_TIME = 90;
-  const JUMP_VELOCITY = -600 * scale;
+  const JUMP_VELOCITY = -900 * scale;
   const DROP_VELOCITY = -120;
 
   document.addEventListener("keydown", (e) => {

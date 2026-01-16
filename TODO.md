@@ -1,6 +1,4 @@
-- [x] Edit src/game/input.js to increase JUMP_VELOCITY from -600 to -800 * scale
-- [x] Edit src/game/game.js to decrease gravity from 2000 to 1500
-- [x] Edit src/game/player.js to decrease MIN_JUMP_HEIGHT from 60 to 40 * scale
-- [x] Decrease JUMP_VELOCITY from -800 * scale to -600 * scale to reduce jump height
-- [x] Increase gravity from 1500 to 2000 to make jump reach peak faster
-- [x] Test the game to ensure jump feels lower and quicker to peak
+# TODO: Make #highscore-hint Responsive
+
+- [x] Update .glitch-group CSS: Change white-space to 'pre-wrap' and add max-width: 90vw;
+- [x] Update .glitch-group::before and ::after CSS: Change white-space to 'pre-wrap';

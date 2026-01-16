@@ -1,15 +1,27 @@
-export function drawUI(ctx, canvas, state, assets, scale) {
+const UI_FONT = "RetroPixel";
+
+export async function drawUI(ctx, canvas, state, assets, scale) {
+  await document.fonts.load(`${20 * scale}px ${UI_FONT}`);
+
+  ctx.imageSmoothingEnabled = false;
+
   ctx.fillStyle = "#f5f5f5";
-  ctx.font = `${20 * scale}px system-ui`;
+  ctx.font = `${20 * scale}px ${UI_FONT}`;
   ctx.textAlign = "left";
-  ctx.fillText("Score: " + Math.floor(state.score), 16 * scale, 32 * scale);
+  ctx.textBaseline = "top";
+
+  ctx.fillText(
+    "Score: " + Math.floor(state.score),
+    16 * scale,
+    16 * scale
+  );
 
   ctx.fillStyle = "#ff5252";
   ctx.textAlign = "right";
   ctx.fillText(
-    "Highscore: " + Math.floor(state.highScore),
+    "Personal Highscore: " + Math.floor(state.highScore),
     canvas.width - 16 * scale,
-    32 * scale
+    16 * scale
   );
 
   if (state.gameState === "start") {
@@ -17,35 +29,35 @@ export function drawUI(ctx, canvas, state, assets, scale) {
   }
 
   if (state.gameState === "gameover") {
-    if (state.showSaveOverlay) { 
-      console.log("Drawing save score screen");
+    if (state.showSaveOverlay) {
       drawSaveScoreScreen(ctx, state, canvas, scale);
     } else {
-      console.log("Drawing game over screen");
       drawGameOverScreen(ctx, state, canvas, scale);
     }
   }
 }
 
+
 function drawStartScreen(ctx, canvas, assets, scale) {
-  // donkere overlay
   ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // afbeelding centreren
-  const imgWidth = 300 * scale;
-  const imgHeight = 300 * scale;
-  ctx.drawImage(assets.startImage, canvas.width/2 - imgWidth/2, canvas.height/2 - imgHeight/2 - 40 * scale, imgWidth, imgHeight);
-
-  // titel
-  ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
-  ctx.font = `${32 * scale}px system-ui`;
-  ctx.fillText("RUN FROM JASON", canvas.width/2, canvas.height/2 + 150 * scale);
 
-  // instructies
-  ctx.font = `${18 * scale}px system-ui`;
-  ctx.fillText("Druk op SPATIE om te starten", canvas.width/2, canvas.height/2 + 185 * scale);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `${32 * scale}px ${UI_FONT}`;
+  ctx.fillText(
+    "RUN FROM JASON",
+    canvas.width / 2,
+    canvas.height / 2 - 20 * scale
+  );
+
+  ctx.font = `${18 * scale}px ${UI_FONT}`;
+  ctx.fillText(
+    "Press SPATIE to start",
+    canvas.width / 2,
+    canvas.height / 2 + 20 * scale
+  );
 }
 
 function drawGameOverScreen(ctx, state, canvas, scale) {
@@ -53,12 +65,17 @@ function drawGameOverScreen(ctx, state, canvas, scale) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.textAlign = "center";
+
   ctx.fillStyle = "#ff5252";
-  ctx.font = "32px system-ui";
-  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 40);
+  ctx.font = `${32 * scale}px ${UI_FONT}`;
+  ctx.fillText(
+    "GAME OVER",
+    canvas.width / 2,
+    canvas.height / 2 - 60 * scale
+  );
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "20px system-ui";
+  ctx.font = `${20 * scale}px ${UI_FONT}`;
   ctx.fillText(
     "Score: " + Math.floor(state.score),
     canvas.width / 2,
@@ -66,16 +83,16 @@ function drawGameOverScreen(ctx, state, canvas, scale) {
   );
 
   ctx.fillText(
-    "Highscore: " + Math.floor(state.highScore),
+    "Personal Highscore: " + Math.floor(state.highScore),
     canvas.width / 2,
-    canvas.height / 2 + 30
+    canvas.height / 2 + 28 * scale
   );
 
-  ctx.font = "18px system-ui";
+  ctx.font = `${18 * scale}px ${UI_FONT}`;
   ctx.fillText(
     "Druk op R om opnieuw te spelen",
     canvas.width / 2,
-    canvas.height / 2 + 70
+    canvas.height / 2 + 70 * scale
   );
 }
 
@@ -95,28 +112,32 @@ function drawSaveScoreScreen(ctx, state, canvas, scale) {
   ctx.textAlign = "center";
 
   ctx.fillStyle = "#ff0000";
-  ctx.font = `${28 * scale}px system-ui`;
-  ctx.fillText("SAVE SCORE", canvas.width / 2, y + 40 * scale);
+  ctx.font = `${28 * scale}px ${UI_FONT}`;
+  ctx.fillText(
+    "SAVE SCORE",
+    canvas.width / 2,
+    y + 24 * scale
+  );
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = `${20 * scale}px system-ui`;
+  ctx.font = `${20 * scale}px ${UI_FONT}`;
   ctx.fillText(
     `Score: ${Math.floor(state.score)}`,
     canvas.width / 2,
-    y + 90 * scale
+    y + 80 * scale
   );
 
-  ctx.font = `${16 * scale}px system-ui`;
+  ctx.font = `${16 * scale}px ${UI_FONT}`;
   ctx.fillText(
-    "Typ je naam en druk op ENTER",
+    "Type your name and press ENTER",
     canvas.width / 2,
-    y + 140 * scale
+    y + 120 * scale
   );
 
   ctx.strokeStyle = "#ffffff";
   ctx.strokeRect(
     canvas.width / 2 - 100 * scale,
-    y + 160 * scale,
+    y + 150 * scale,
     200 * scale,
     30 * scale
   );
@@ -124,6 +145,6 @@ function drawSaveScoreScreen(ctx, state, canvas, scale) {
   ctx.fillText(
     state.playerName || "_",
     canvas.width / 2,
-    y + 182 * scale
+    y + 157 * scale
   );
 }
