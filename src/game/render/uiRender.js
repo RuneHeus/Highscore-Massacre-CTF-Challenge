@@ -97,11 +97,13 @@ function drawGameOverScreen(ctx, state, canvas, scale) {
 }
 
 function drawSaveScoreScreen(ctx, state, canvas, scale) {
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
   ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const boxW = 360 * scale;
-  const boxH = 260 * scale;
+  const boxH = 300 * scale; // iets hoger voor extra tekst
   const x = canvas.width / 2 - boxW / 2;
   const y = canvas.height / 2 - boxH / 2;
 
@@ -110,34 +112,39 @@ function drawSaveScoreScreen(ctx, state, canvas, scale) {
   ctx.strokeRect(x, y, boxW, boxH);
 
   ctx.textAlign = "center";
+  ctx.textBaseline = "top";
 
+  // Titel
   ctx.fillStyle = "#ff0000";
   ctx.font = `${28 * scale}px ${UI_FONT}`;
   ctx.fillText(
     "SAVE SCORE",
     canvas.width / 2,
-    y + 24 * scale
+    y + 20 * scale
   );
 
+  // Score
   ctx.fillStyle = "#ffffff";
   ctx.font = `${20 * scale}px ${UI_FONT}`;
   ctx.fillText(
     `Score: ${Math.floor(state.score)}`,
     canvas.width / 2,
-    y + 80 * scale
+    y + 70 * scale
   );
 
+  // Instructie
   ctx.font = `${16 * scale}px ${UI_FONT}`;
   ctx.fillText(
     "Type your name and press ENTER",
     canvas.width / 2,
-    y + 120 * scale
+    y + 115 * scale
   );
 
+  // Input box
   ctx.strokeStyle = "#ffffff";
   ctx.strokeRect(
     canvas.width / 2 - 100 * scale,
-    y + 150 * scale,
+    y + 145 * scale,
     200 * scale,
     30 * scale
   );
@@ -145,6 +152,14 @@ function drawSaveScoreScreen(ctx, state, canvas, scale) {
   ctx.fillText(
     state.playerName || "_",
     canvas.width / 2,
-    y + 157 * scale
+    y + 152 * scale
+  );
+
+  ctx.fillStyle = "#aaaaaa";
+  ctx.font = `${14 * scale}px ${UI_FONT}`;
+  ctx.fillText(
+    "Press ESC to cancel",
+    canvas.width / 2,
+    y + boxH - 28 * scale
   );
 }

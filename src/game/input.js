@@ -1,6 +1,11 @@
 function handleSaveInput(e, state) {
   if (!state.showSaveOverlay) return false;
 
+  if (e.key === "Escape") {
+    state.showSaveOverlay = false;
+    return true;
+  }
+
   if (e.key === "Backspace") {
     state.playerName = state.playerName.slice(0, -1);
     return true;
