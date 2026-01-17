@@ -39,6 +39,10 @@ app.post("/score", async (req, res) => {
       return res.status(400).json({ error: "Invalid data" });
     }
 
+    if (score > 2147483647) {
+      return res.status(400).json({ error: "Thats a bit to much, no? :D" });
+    }
+
     // 1. Create session
     const session = await prisma.game_session.create({
       data: {
