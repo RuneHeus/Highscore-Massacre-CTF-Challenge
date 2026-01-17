@@ -50,11 +50,11 @@ export function initGame(canvas) {
     if (player) {
       player.width = 80 * scale;
       player.height = 120 * scale;
-      player.hbOffsetX = (player.width - 56 * scale) / 2;
-      player.hbWidth = 56 * scale;
+      player.hbOffsetX = (player.width - 55 * scale) / 2;
+      player.hbWidth = 55 * scale;
       player.hbHeight = 117 * scale;
       player.x = canvas.width * 0.3125;
-      player.y = ground.y - player.height;
+      player.y = ground.y - player.height + player.visualOffsetY;
     }
 
     // Scale existing obstacles
@@ -109,7 +109,7 @@ export function initGame(canvas) {
     state.lastTime = 0;
     state.gameState = "running";
 
-    player.y = ground.y - player.height;
+    player.y = ground.y - player.height + player.visualOffsetY;
     player.vy = 0;
     player.grounded = true;
     player.jumping = false;

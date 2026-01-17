@@ -1,8 +1,8 @@
 export function createPlayer(scale, groundY, canvasWidth) {
   const height = 120 * scale;
   const width = 80 * scale;
-  const hbWidth = 56 * scale;
-  const hbHeight = 117 * scale;
+  const hbWidth = 55 * scale;
+  const hbHeight = 110 * scale;
   return {
     x: canvasWidth * 0.3125,
     y: groundY - height,
@@ -20,6 +20,7 @@ export function createPlayer(scale, groundY, canvasWidth) {
     jumpStartY: 0,
     frameIndex: 0,
     frameTimer: 0,
+    visualOffsetY: height - hbHeight,
   };
 }
 
@@ -56,8 +57,8 @@ export function updatePlayer(player, deltaSeconds, ground, gravity, scale) {
   }
 
   // Landing
-  if (player.y + player.height >= ground.y) {
-    player.y = ground.y - player.height;
+  if (player.y + player.height - player.visualOffsetY >= ground.y) {
+    player.y = ground.y - player.height + player.visualOffsetY;
     player.vy = 0;
     player.grounded = true;
     player.jumping = false;

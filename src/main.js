@@ -11,8 +11,6 @@ const closeBtn = document.getElementById("close-leaderboard");
 const list = document.getElementById("leaderboard-list");
 
 window.onScoreSubmitted = function (data) {
-  console.log("onScoreSubmitted called:", data);
-
   currentSessionId = data.sessionId;
   ctfBtn.classList.remove("hidden");
 };
