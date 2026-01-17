@@ -11,5 +11,7 @@ export const state = {
   distanceSinceLastObstacle: 0,
   obstacleDistance: 500,
   showSaveOverlay: false,
-  playerName: ""
+  playerName: "",
+  isHighest: false,
+  ctfKey: null
 };

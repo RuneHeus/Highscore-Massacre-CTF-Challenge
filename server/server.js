@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 
 app.post("/score", async (req, res) => {
   console.log("POST /score body:", req.body);
+
   try {
     const { name, score, gameId } = req.body;
 
@@ -38,6 +39,7 @@ app.post("/score", async (req, res) => {
       return res.status(400).json({ error: "Invalid data" });
     }
 
+    // 1. Create session
     const session = await prisma.game_session.create({
       data: {
         game_id: gameId,
@@ -50,6 +52,7 @@ app.post("/score", async (req, res) => {
       }
     });
 
+    // 2. Save leaderboard entry
     await prisma.leaderboard_entry.create({
       data: {
         game_id: gameId,
@@ -59,13 +62,52 @@ app.post("/score", async (req, res) => {
       }
     });
 
-    res.json({ success: true });
+    // 3. Determine if THIS score is the highest on the leaderboard
+    const topEntry = await prisma.leaderboard_entry.findFirst({
+      where: { game_id: gameId },
+      orderBy: { score: "desc" }
+    });
+
+    const isHighest = !topEntry || score >= topEntry.score;
+
+    // 4. Respond (DO NOT update all_time_high_score here)
+    res.json({
+      success: true,
+      isHighest,
+      sessionId: session.session_id
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+app.post("/ctf/claim", async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) return res.status(400).json({ error: "Missing sessionId" });
+
+    const session = await prisma.game_session.findUnique({
+      where: { session_id: sessionId }
+    });
+    if (!session) return res.status(404).json({ error: "Invalid session" });
+
+    const game = await prisma.game.findUnique({
+      where: { game_id: session.game_id }
+    });
+
+    //Je moet de hoogste score hebben om de vlag te krijgen
+    if (session.final_score < game.all_time_high_score) {
+      return res.status(403).json({ error: "Not eligible" });
+    }
+
+    return res.json({ flag: "CTF{Ki_kI_KI_Ma_MA_mA}" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.get("/leaderboard/:gameId", async (req, res) => {
   console.log("GET /leaderboard gameId:", req.params.gameId);

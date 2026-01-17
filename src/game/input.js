@@ -32,7 +32,7 @@ async function submitScore(state) {
   };
 
   try {
-    await fetch("/score", {
+    const res = await fetch("/score", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -40,13 +40,19 @@ async function submitScore(state) {
       body: JSON.stringify(payload)
     });
 
+    const data = await res.json();
+
+    if (data.success && window.onScoreSubmitted) {
+      console.log("Score submitted successfully", data);
+      window.onScoreSubmitted(data);
+    }
+
     state.showSaveOverlay = false;
     state.gameState = "gameover";
   } catch (err) {
     console.error("Failed to submit score", err);
   }
 }
-
 
 export function setupInput(state, player, resetGame, scale) {
   let jumpHeld = false;

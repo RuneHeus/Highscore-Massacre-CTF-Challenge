@@ -2,16 +2,16 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const survivors = [
-  { name: "AliceHardy",    score: 420 },
-  { name: "GinnyField",    score: 543 },
-  { name: "ChrisHiggins",  score: 201 },
-  { name: "TrishJarvis",   score: 545 },
-  { name: "TommyJarvis",   score: 333 },
-  { name: "MeganGarris",   score: 331 },
-  { name: "TinaShepard",   score: 156 },
-  { name: "RennieWickham", score: 940 },
-  { name: "JessicaKimble", score: 643 },
-  { name: "WhitneyMiller", score: 432 }
+  { name: "AliceHardy",    score: 123 },
+  { name: "GinnyField",    score: 121 },
+  { name: "ChrisHiggins",  score: 198 },
+  { name: "TrishJarvis",   score: 167 },
+  { name: "TommyJarvis",   score: 101 },
+  { name: "MeganGarris",   score: 99 },
+  { name: "TinaShepard",   score: 43 },
+  { name: "RennieWickham", score: 32 },
+  { name: "JessicaKimble", score: 23 },
+  { name: "WhitneyMiller", score: 15 }
 ];
 
 async function main() {
@@ -50,13 +50,12 @@ async function main() {
     });
   }
 
-  // 🩸 Legendary / Unbeatable survivor
   const extremeSession = await prisma.game_session.create({
     data: {
       game_id: game.game_id,
       start_time: new Date(Date.now() - 999999 * 10),
       end_time: new Date(),
-      final_score: 999999,
+      final_score: 9999999,
       time_played_seconds: 6666,
       status: "finished",
       ip_address: "192.168.0.250",
@@ -68,7 +67,7 @@ async function main() {
       game_id: game.game_id,
       session_id: extremeSession.session_id,
       player_name: "FinalCounselor",
-      score: 999999,
+      score: 9999999,
     },
   });
 }

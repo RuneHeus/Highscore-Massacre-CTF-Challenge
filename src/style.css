@@ -278,3 +278,61 @@ canvas {
     opacity: 1;
   }
 }
+
+/* ================= CTF CLAIM BUTTON ================= */
+#ctf-claim-btn {
+  position: fixed;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  font-size: 20px;
+  padding: 12px 18px;
+
+  color: #ff0000;
+  background: black;
+  border: 3px solid #ff0000;
+  cursor: pointer;
+
+  text-shadow: 2px 2px 0 #330000;
+  box-shadow:
+    0 0 12px rgba(255, 0, 0, 0.4),
+    inset 0 0 12px rgba(255, 0, 0, 0.2);
+
+  animation: ctf-pulse 1.6s infinite;
+}
+
+/* Standaard verborgen */
+#ctf-claim-btn.hidden {
+  display: none;
+}
+
+/* Hover effect */
+#ctf-claim-btn:hover {
+  background: #220000;
+  box-shadow:
+    0 0 18px rgba(255, 0, 0, 0.7),
+    inset 0 0 18px rgba(255, 0, 0, 0.4);
+}
+
+/* Disabled state (optioneel, maar netjes) */
+#ctf-claim-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  animation: none;
+}
+
+@keyframes ctf-pulse {
+  0% {
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+  }
+
+  100% {
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+  }
+}
