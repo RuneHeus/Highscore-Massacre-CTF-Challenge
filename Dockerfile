@@ -9,6 +9,7 @@ COPY src ./src
 COPY server ./server
 COPY prisma ./prisma
 COPY public ./public
+COPY sandbox ./sandbox
 COPY vite.config.js ./
 COPY index.html ./
 

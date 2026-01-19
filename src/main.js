@@ -10,7 +10,6 @@ const modal = document.getElementById("leaderboard-modal");
 const closeBtn = document.getElementById("close-leaderboard");
 const list = document.getElementById("leaderboard-list");
 
-// Check if current session has the highest score on page load
 if (currentSessionId) {
   checkIfHighestScore();
 }
@@ -36,7 +35,9 @@ ctfBtn?.addEventListener("click", () => {
     return;
   }
 
-  window.open('/mask_of_jason_manuscript_v.4.pdf', '_blank');
+  alert("Well done! Take this key CTF{Ki_kI_KI_Ma_MA_mA} and enjoy the free book");
+
+  window.location.href = "/lore/book?path=public/lore/mask_of_jason_manuscript_v.4.pdf";
 });
 
 closeBtn.addEventListener("click", () => {
