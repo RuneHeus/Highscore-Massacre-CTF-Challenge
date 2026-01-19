@@ -52,7 +52,7 @@ export function initGame(canvas) {
       player.height = 120 * scale;
       player.hbOffsetX = (player.width - 55 * scale) / 2;
       player.hbWidth = 55 * scale;
-      player.hbHeight = 117 * scale;
+      player.hbHeight = 110 * scale;
       player.x = canvas.width * 0.3125;
       player.y = ground.y - player.height + player.visualOffsetY;
     }

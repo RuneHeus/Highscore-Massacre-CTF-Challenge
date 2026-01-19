@@ -1,0 +1,5 @@
+- [x] Modify server/server.js to include session_id in leaderboard response
+- [x] Update src/main.js to retrieve sessionId from localStorage
+- [x] Add check on page load to verify if current session has highest score
+- [x] Update onScoreSubmitted to store sessionId in localStorage
+- [x] Add checkIfHighestScore function to compare session with leaderboard
