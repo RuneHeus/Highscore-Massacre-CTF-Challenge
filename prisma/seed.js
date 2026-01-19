@@ -2,16 +2,16 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const survivors = [
-  { name: "AliceHardy",    score: 123 },
-  { name: "GinnyField",    score: 121 },
-  { name: "ChrisHiggins",  score: 198 },
-  { name: "TrishJarvis",   score: 167 },
-  { name: "TommyJarvis",   score: 101 },
-  { name: "MeganGarris",   score: 99 },
-  { name: "TinaShepard",   score: 43 },
-  { name: "RennieWickham", score: 32 },
-  { name: "JessicaKimble", score: 23 },
-  { name: "WhitneyMiller", score: 15 }
+  { name: "AliceHardy",    score: 545 },
+  { name: "GinnyField",    score: 421 },
+  { name: "ChrisHiggins",  score: 643 },
+  { name: "TrishJarvis",   score: 123 },
+  { name: "TommyJarvis",   score: 380 },
+  { name: "MeganGarris",   score: 155 },
+  { name: "TinaShepard",   score: 345 },
+  { name: "RennieWickham", score: 654 },
+  { name: "JessicaKimble", score: 878 },
+  { name: "WhitneyMiller", score: 419 }
 ];
 
 async function main() {
