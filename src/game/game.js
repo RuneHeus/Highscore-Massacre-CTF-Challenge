@@ -14,7 +14,6 @@ import { drawUI } from "./render/uiRender";
 export function initGame(canvas) {
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
-  let isPaused = false;
 
   document.addEventListener("visibilitychange", () => {
     console.log("[DEBUG] visibilitychange event: ", document.hidden);
