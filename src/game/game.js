@@ -14,6 +14,15 @@ import { drawUI } from "./render/uiRender";
 export function initGame(canvas) {
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
+  let isPaused = false;
+
+  document.addEventListener("visibilitychange", () => {
+    console.log("[DEBUG] visibilitychange event: ", document.hidden);
+    if (document.hidden && state.gameState === "running") {
+      state.gameState = "gameover";
+      state.showSaveOverlay = false;
+    }
+  });
 
   const BASE_WIDTH = 800;
   const BASE_HEIGHT = 400;
@@ -117,6 +126,7 @@ export function initGame(canvas) {
   }
 
   function loop(timestamp) {
+    // Always initialize lastTime safely
     if (state.lastTime === 0) {
       state.lastTime = timestamp;
       requestAnimationFrame(loop);
@@ -130,15 +140,24 @@ export function initGame(canvas) {
 
     if (state.gameState === "running") {
       state.baseSpeed += state.speedIncrease * delta;
+
       updatePlayer(player, delta, ground, 3500, scale);
       updatePlayerAnimation(player, delta);
-      updateObstacles(state.obstacles, state.baseSpeed, delta, state, canvas.width, ground.y, scale);
+      updateObstacles(
+        state.obstacles,
+        state.baseSpeed,
+        delta,
+        state,
+        canvas.width,
+        ground.y,
+        scale
+      );
 
       for (const obs of state.obstacles) {
         if (checkCollision(player, obs)) {
           state.gameState = "gameover";
           console.log("Game Over! Final Score:", Math.floor(state.score));
-          if(state.score >= 200){
+          if (state.score >= 200) {
             state.showSaveOverlay = true;
           }
           break;

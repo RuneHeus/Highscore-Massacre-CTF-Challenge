@@ -95,9 +95,9 @@ function drawGameOverScreen(ctx, state, canvas, scale) {
     canvas.height / 2 + 70 * scale
   );
 
-  if (state.score < 500) {
+  if (state.score < 200) {
     ctx.fillText(
-      "get 500 or more score in order to save score",
+      "get 200 or more score in order to save score",
       canvas.width / 2,
       canvas.height / 2 + 98 * scale
     );
