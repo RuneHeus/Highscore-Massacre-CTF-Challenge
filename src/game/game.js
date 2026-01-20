@@ -138,7 +138,7 @@ export function initGame(canvas) {
         if (checkCollision(player, obs)) {
           state.gameState = "gameover";
           console.log("Game Over! Final Score:", Math.floor(state.score));
-          if(state.score >= 500){
+          if(state.score >= 200){
             state.showSaveOverlay = true;
           }
           break;

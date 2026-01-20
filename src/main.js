@@ -4,7 +4,7 @@ import { initGame } from "./game/game";
 const canvas = document.getElementById("gameCanvas");
 initGame(canvas);
 const ctfBtn = document.getElementById("ctf-claim-btn");
-let currentSessionId = localStorage.getItem("sessionId");
+let currentSessionId = Number(localStorage.getItem("ctf_sessionId") || 0) || null;
 const btn = document.getElementById("leaderboard-btn");
 const modal = document.getElementById("leaderboard-modal");
 const closeBtn = document.getElementById("close-leaderboard");
@@ -15,11 +15,9 @@ if (currentSessionId) {
 }
 
 window.onScoreSubmitted = function (data) {
-  console.log("Score submission result:", data);
   currentSessionId = data.sessionId;
-  localStorage.setItem("sessionId", data.sessionId);
+  localStorage.setItem("ctf_sessionId", data.sessionId);
   if (data.isHighest) {
-    console.log("Removing hidden class from ctfBtn");
     ctfBtn.classList.remove("hidden");
   }
 };
@@ -29,15 +27,40 @@ btn.addEventListener("click", async () => {
   await loadLeaderboard();
 });
 
-ctfBtn?.addEventListener("click", () => {
+ctfBtn?.addEventListener("click", async () => {
   if (!currentSessionId) {
     alert("Nothing happens...");
     return;
   }
 
-  alert("Well done! Take this key CTF{Ki_kI_KI_Ma_MA_mA} and enjoy the free book");
+  try {
+    const res = await fetch("/claim-ctf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        gameId: 1
+      })
+    });
 
-  window.location.href = "/lore/book?path=public/lore/mask_of_jason_manuscript_v.4.pdf";
+    const data = await res.json();
+
+    if (!data.success) {
+      alert("The lake remains silent...");
+      return;
+    }
+    
+    alert(`Well done! Take this key ${data.flag} and enjoy the free book`);
+
+    window.location.href =
+      "/lore/book?path=public/lore/mask_of_jason_manuscript_v.4.pdf";
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong in the woods...");
+  }
 });
 
 closeBtn.addEventListener("click", () => {

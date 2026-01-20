@@ -236,7 +236,53 @@ function renderPage(title, listItems) {
   `;
 }
 
-// --- STATIC + SPA FALLBACK ---
+app.post("/claim-ctf", async (req, res) => {
+  try {
+    const { sessionId, gameId } = req.body;
+
+    if (!sessionId || !gameId) {
+      return res.status(400).json({ error: "Invalid request" });
+    }
+
+    // Fetch this session's leaderboard entry
+    const entry = await prisma.leaderboard_entry.findUnique({
+      where: { session_id: sessionId }
+    });
+
+    if (!entry || entry.game_id !== gameId) {
+      return res.status(403).json({ error: "Session not found" });
+    }
+
+    const topEntry = await prisma.leaderboard_entry.findFirst({
+      where: { game_id: gameId },
+      orderBy: { score: "desc" }
+    });
+
+    if (!topEntry) {
+      return res.status(404).json({ error: "Leaderboard empty" });
+    }
+
+    // Check if THIS session is the top scorer
+    if (topEntry.session_id !== sessionId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not the chosen one."
+      });
+    }
+
+    const CTF_KEY = "CTF{Ki_kI_KI_Ma_MA_mA}";
+
+    res.json({
+      success: true,
+      flag: CTF_KEY
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 const DIST_PATH = path.join(__dirname, "../dist");
 
 app.use(express.static(DIST_PATH));
