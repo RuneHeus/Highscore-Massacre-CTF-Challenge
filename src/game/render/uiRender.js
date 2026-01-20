@@ -54,7 +54,7 @@ function drawStartScreen(ctx, canvas, assets, scale) {
 
   ctx.font = `${18 * scale}px ${UI_FONT}`;
   ctx.fillText(
-    "Press SPATIE to start",
+    "Press SPACE to start",
     canvas.width / 2,
     canvas.height / 2 + 20 * scale
   );
@@ -90,7 +90,7 @@ function drawGameOverScreen(ctx, state, canvas, scale) {
 
   ctx.font = `${18 * scale}px ${UI_FONT}`;
   ctx.fillText(
-    "Druk op R om opnieuw te spelen",
+    "Press R to restart",
     canvas.width / 2,
     canvas.height / 2 + 70 * scale
   );
