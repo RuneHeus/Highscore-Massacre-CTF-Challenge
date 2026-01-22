@@ -41,7 +41,7 @@ if (currentSessionId) {
   })();
 }
 
-window.onScoreSubmitted = function (data) {
+globalThis.onScoreSubmitted = function (data) {
   currentSessionId = data.sessionId;
   localStorage.setItem("ctf_sessionId", data.sessionId);
   if (data.isHighest) {
@@ -81,7 +81,7 @@ ctfBtn?.addEventListener("click", async () => {
     
     alert(`Well done! Take this key ${data.flag} and enjoy the free book`);
 
-    window.location.href =
+    globalThis.location.href =
       "/lore/book?path=public/lore/mask_of_jason_manuscript_v.4.pdf";
 
   } catch (err) {
