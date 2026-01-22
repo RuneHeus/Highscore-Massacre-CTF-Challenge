@@ -13,8 +13,7 @@ COPY sandbox ./sandbox
 COPY vite.config.js ./
 COPY index.html ./
 
-RUN npm run build
-RUN npx prisma generate
+RUN npm run build && npx prisma generate
 
 USER node
 

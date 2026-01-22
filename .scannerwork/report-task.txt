@@ -2,5 +2,5 @@ projectKey=a3-Jason-Arcade-Runner-webgame
 serverUrl=https://sonar.pit-graduaten.be
 serverVersion=25.12.0.117093
 dashboardUrl=https://sonar.pit-graduaten.be/dashboard?id=a3-Jason-Arcade-Runner-webgame
-ceTaskId=d8486469-b7e8-478c-943e-2891702c3d46
-ceTaskUrl=https://sonar.pit-graduaten.be/api/ce/task?id=d8486469-b7e8-478c-943e-2891702c3d46
+ceTaskId=dc80aae4-a441-4a28-8acb-fc95cf8f5639
+ceTaskUrl=https://sonar.pit-graduaten.be/api/ce/task?id=dc80aae4-a441-4a28-8acb-fc95cf8f5639

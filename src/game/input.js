@@ -42,9 +42,9 @@ async function submitScore(state) {
 
     const data = await res.json();
 
-    if (data.success && window.onScoreSubmitted) {
+    if (data.success && globalThis.onScoreSubmitted) {
       console.log("Score submitted successfully", data);
-      window.onScoreSubmitted(data);
+      globalThis.onScoreSubmitted(data);
     }
 
     state.showSaveOverlay = false;

@@ -11,7 +11,34 @@ const closeBtn = document.getElementById("close-leaderboard");
 const list = document.getElementById("leaderboard-list");
 
 if (currentSessionId) {
-  checkIfHighestScore();
+  await (async () => {
+    console.log("[DEBUG] checkIfHighestScore called");
+    console.log("[DEBUG] currentSessionId:", currentSessionId);
+
+    try {
+      const res = await fetch("/leaderboard/1");
+      const data = await res.json();
+
+      if (data.length > 0) {
+        const currentEntry = data.find(
+          entry => entry.session_id == currentSessionId
+        );
+
+        if (currentEntry) {
+          const currentScore = currentEntry.score;
+          const isHighest = data.every(
+            entry => entry.score <= currentScore
+          );
+
+          if (isHighest) {
+            ctfBtn.classList.remove("hidden");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("[ERROR] Error checking highest score:", error);
+    }
+  })();
 }
 
 window.onScoreSubmitted = function (data) {
@@ -93,50 +120,5 @@ async function loadLeaderboard() {
 
   } catch {
     list.innerHTML = "<p>Error loading leaderboard</p>";
-  }
-}
-
-async function checkIfHighestScore() {
-  console.log("[DEBUG] checkIfHighestScore called");
-  console.log("[DEBUG] currentSessionId:", currentSessionId);
-
-  try {
-    console.log("[DEBUG] Fetching /leaderboard/1");
-
-    const res = await fetch("/leaderboard/1");
-    console.log("[DEBUG] Fetch completed, status:", res.status);
-
-    const data = await res.json();
-    console.log("[DEBUG] Response JSON:", data);
-
-    if (data.length > 0) {
-      console.log("[DEBUG] Leaderboard length:", data.length);
-
-      // Find the current session's entry
-      const currentEntry = data.find(entry => entry.session_id == currentSessionId);
-      console.log("[DEBUG] Current entry:", currentEntry);
-
-      if (currentEntry) {
-        const currentScore = currentEntry.score;
-        console.log("[DEBUG] Current score:", currentScore);
-
-        // Check if current score is the highest (or tied for highest)
-        const isHighest = data.every(entry => entry.score <= currentScore);
-        console.log("[DEBUG] isHighest result:", isHighest);
-
-        if (isHighest) {
-          console.log("[DEBUG] Current session has highest score, revealing CTF button");
-          ctfBtn.classList.remove("hidden");
-        } else {
-          console.log("[DEBUG] Current session does NOT have highest score");
-        }
-      } else {
-        console.log("[DEBUG] Current session not found in leaderboard");
-      }
-    } else {
-      console.log("[DEBUG] Leaderboard is empty");
-    }
-  } catch (error) {
-    console.error("[ERROR] Error checking highest score:", error);
   }
 }

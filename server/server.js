@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
+import fs from "node:fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { PrismaClient } from "@prisma/client";
 
 const app = express();
+app.disable("x-powered-by");
 const prisma = new PrismaClient();
 const PORT = 3000;
 
@@ -14,7 +16,26 @@ const __dirname = path.dirname(__filename);
 const PUBLIC_LORE_ROOT = path.resolve(__dirname, "../public");
 const SANDBOX_ALLOWED_ROOT = path.resolve(__dirname, "../sandbox");
 
-app.use(cors());
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000"
+]);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.has(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST"],
+  credentials: false
+}));
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -156,7 +177,7 @@ app.get("/download/:filename", (req, res) => {
   });
 });
 
-import fs from "fs";
+
 
 const VIRTUAL_ROOTS = {
   public: PUBLIC_LORE_ROOT,
