@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import fs from "node:fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -33,9 +34,10 @@ app.use(cors({
     }
   },
   methods: ["GET", "POST"],
-  credentials: false
+  credentials: true
 }));
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -65,10 +67,33 @@ app.post("/score", async (req, res) => {
       return res.status(400).json({ error: "Thats a bit to much, no? :D" });
     }
 
-    // Check if a session already exists for this IP and game
+    // Get or create player UUID from cookie
+    let playerId = req.cookies.player_uuid;
+    let isNewPlayer = false;
+
+    if (playerId) {
+      const existingPlayer = await prisma.player.findUnique({
+        where: { player_id: playerId }
+      });
+
+      if (!existingPlayer) {
+        // Cookie is stale (DB reset). Re-create player with same UUID (of maak nieuwe).
+        const recreated = await prisma.player.create({
+          data: { player_id: playerId }
+        });
+        playerId = recreated.player_id;
+        isNewPlayer = true; // optioneel: cookie opnieuw zetten
+      }
+    } else {
+      const newPlayer = await prisma.player.create({ data: {} });
+      playerId = newPlayer.player_id;
+      isNewPlayer = true;
+    }
+
+    // Check if a session already exists for this player and game
     let existingSession = await prisma.game_session.findFirst({
       where: {
-        ip_address: req.ip,
+        player_id: playerId,
         game_id: gameId
       }
     });
@@ -102,13 +127,13 @@ app.post("/score", async (req, res) => {
       // Create new session
       const session = await prisma.game_session.create({
         data: {
+          player_id: playerId,
           game_id: gameId,
           start_time: new Date(),
           end_time: new Date(),
           final_score: score,
           time_played_seconds: 0,
-          status: "finished",
-          ip_address: req.ip
+          status: "finished"
         }
       });
 
@@ -132,6 +157,15 @@ app.post("/score", async (req, res) => {
     });
 
     const isHighest = !topEntry || score >= topEntry.score;
+
+    if (isNewPlayer) {
+      res.cookie("player_uuid", playerId, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false, // true in production (HTTPS)
+        maxAge: 365 * 24 * 60 * 60 * 1000
+      });
+    }
 
     // Respond
     res.json({

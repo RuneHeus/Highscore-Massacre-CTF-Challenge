@@ -8,32 +8,34 @@ datasource db {
 }
 
 model Game {
-  game_id            Int           @id @default(autoincrement())
-  title              String
-  description        String
-  instructions       String
-  thumbnail_url      String
-  is_active           Boolean       @default(true)
-  created_date       DateTime      @default(now())
-  total_plays        Int           @default(0)
-  all_time_high_score Int           @default(0)
+  game_id             Int      @id @default(autoincrement())
+  title               String
+  description         String
+  instructions        String
+  thumbnail_url       String
+  is_active           Boolean  @default(true)
+  created_date        DateTime @default(now())
+  total_plays         Int      @default(0)
+  all_time_high_score Int      @default(0)
 
-  sessions           Game_session[]
-  leaderboard        Leaderboard_entry[]
+  sessions    Game_session[]
+  leaderboard Leaderboard_entry[]
 }
 
 model Game_session {
-  session_id           Int       @id @default(autoincrement())
-  game_id              Int
-  start_time           DateTime
-  end_time             DateTime?
-  final_score          Int
-  time_played_seconds  Int
-  status               String
-  ip_address           String
+  session_id          Int       @id @default(autoincrement())
+  game_id             Int
+  player_id           String
+  start_time          DateTime
+  end_time            DateTime?
+  final_score         Int
+  time_played_seconds Int
+  status              String
 
-  game                 Game      @relation(fields: [game_id], references: [game_id])
-  leaderboard_entry    Leaderboard_entry?
+  game   Game   @relation(fields: [game_id], references: [game_id])
+  player Player @relation(fields: [player_id], references: [player_id])
+
+  leaderboard_entry Leaderboard_entry?
 }
 
 model Leaderboard_entry {
@@ -44,8 +46,14 @@ model Leaderboard_entry {
   score         Int
   achieved_date DateTime @default(now())
 
-  game          Game         @relation(fields: [game_id], references: [game_id])
-  session       Game_session @relation(fields: [session_id], references: [session_id])
+  game    Game         @relation(fields: [game_id], references: [game_id])
+  session Game_session @relation(fields: [session_id], references: [session_id])
 
   @@index([game_id, score(sort: Desc)])
+}
+
+model Player {
+  player_id  String         @id @default(uuid())
+  created_at DateTime       @default(now())
+  sessions   Game_session[]
 }
