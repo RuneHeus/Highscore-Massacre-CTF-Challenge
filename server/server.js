@@ -64,7 +64,9 @@ app.post("/score", async (req, res) => {
     }
 
     if (score > 2147483647) {
-      return res.status(400).json({ error: "Thats a bit to much, no? :D" });
+      return res.status(400).json({ error: "I only eat signed 32-bit integer." });
+    }else if (score < 0) {
+      return res.status(400).json({ error: "Are you going backwards?🤔" });
     }
 
     // Get or create player UUID from cookie
@@ -210,8 +212,6 @@ app.get("/download/:filename", (req, res) => {
     }
   });
 });
-
-
 
 const VIRTUAL_ROOTS = {
   public: PUBLIC_LORE_ROOT,
