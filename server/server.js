@@ -152,13 +152,8 @@ app.post("/score", async (req, res) => {
       sessionId = session.session_id;
     }
 
-    // Determine if THIS score is the highest on the leaderboard
-    const topEntry = await prisma.leaderboard_entry.findFirst({
-      where: { game_id: gameId },
-      orderBy: { score: "desc" }
-    });
-
-    const isHighest = !topEntry || score >= topEntry.score;
+    // Determine if THIS score allows claiming the prize (higher than final counselor)
+    const canClaim = score > 9999999;
 
     if (isNewPlayer) {
       res.cookie("player_uuid", playerId, {
@@ -168,11 +163,14 @@ app.post("/score", async (req, res) => {
         maxAge: 365 * 24 * 60 * 60 * 1000
       });
     }
+    
+    //Enforce a max of 100 leaderboard entries
+    await enforceLeaderboardLimit(gameId, 100);
 
     // Respond
     res.json({
       success: true,
-      isHighest,
+      canClaim,
       sessionId: sessionId
     });
 
@@ -187,8 +185,7 @@ app.get("/leaderboard/:gameId", async (req, res) => {
 
   const entries = await prisma.leaderboard_entry.findMany({
     where: { game_id: gameId },
-    orderBy: { score: "desc" },
-    take: 5
+    orderBy: { score: "desc" }
   });
 
   const leaderboard = entries.map((entry, index) => ({
@@ -291,6 +288,26 @@ function renderPage(title, listItems) {
   `;
 }
 
+async function enforceLeaderboardLimit(gameId, limit = 100) {
+  const total = await prisma.leaderboard_entry.count({
+    where: { game_id: gameId }
+  });
+
+  if (total <= limit) return;
+
+  const overflow = total - limit;
+  const oldest = await prisma.leaderboard_entry.findMany({
+    where: { game_id: gameId },
+    orderBy: { achieved_date: "asc" },
+    take: overflow,
+    select: { entry_id: true }
+  });
+
+  await prisma.leaderboard_entry.deleteMany({
+    where: { entry_id: { in: oldest.map(e => e.entry_id) } }
+  });
+}
+
 app.post("/claim-ctf", async (req, res) => {
   try {
     const { sessionId, gameId } = req.body;
@@ -299,7 +316,6 @@ app.post("/claim-ctf", async (req, res) => {
       return res.status(400).json({ error: "Invalid request" });
     }
 
-    // Fetch this session's leaderboard entry
     const entry = await prisma.leaderboard_entry.findUnique({
       where: { session_id: sessionId }
     });
@@ -308,20 +324,11 @@ app.post("/claim-ctf", async (req, res) => {
       return res.status(403).json({ error: "Session not found" });
     }
 
-    const topEntry = await prisma.leaderboard_entry.findFirst({
-      where: { game_id: gameId },
-      orderBy: { score: "desc" }
-    });
-
-    if (!topEntry) {
-      return res.status(404).json({ error: "Leaderboard empty" });
-    }
-
-    // Check if THIS session is the top scorer
-    if (topEntry.session_id !== sessionId) {
+    // Require this session’s score to surpass the final counselor score
+    if (entry.score <= 9_999_999) {
       return res.status(403).json({
         success: false,
-        message: "You are not the chosen one."
+        message: "Score too low for the reward."
       });
     }
 

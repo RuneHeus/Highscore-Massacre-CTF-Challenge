@@ -122,12 +122,15 @@ canvas {
 }
 
 .modal-content {
-  width: 420px;
+  width: 90vw;
+  max-width: 420px;
   max-height: 70vh;
   background: black;
   border: 3px solid #ff0000;
   padding: 16px;
   text-align: center;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 /* ===== BLOODY HEADER ===== */
@@ -160,7 +163,9 @@ canvas {
 /* ================= LEADERBOARD LIST ================= */
 #leaderboard-list {
   margin-top: 20px;
+  height: 36vh;
   max-height: 360px;
+  min-height: 120px;
   overflow-y: auto;
   border-top: 1px solid #ff0000;
   border-bottom: 1px solid #ff0000;
@@ -334,5 +339,29 @@ canvas {
 
   100% {
     box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: 98vw;
+    max-width: 98vw;
+    padding: 8px;
+    font-size: 15px;
+  }
+
+  #leaderboard-list {
+    height: 28vh;
+    max-height: 200px;
+    font-size: 13px;
+  }
+
+  .leaderboard-title {
+    font-size: 16px;
+  }
+
+  #close-leaderboard {
+    font-size: 15px;
+    padding: 4px 8px;
   }
 }

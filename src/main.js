@@ -12,7 +12,7 @@ const list = document.getElementById("leaderboard-list");
 
 if (currentSessionId) {
   await (async () => {
-    console.log("[DEBUG] checkIfHighestScore called");
+    console.log("[DEBUG] checkIfEligibleForClaim called");
     console.log("[DEBUG] currentSessionId:", currentSessionId);
 
     try {
@@ -26,17 +26,14 @@ if (currentSessionId) {
 
         if (currentEntry) {
           const currentScore = currentEntry.score;
-          const isHighest = data.every(
-            entry => entry.score <= currentScore
-          );
 
-          if (isHighest) {
+          if (currentScore > 9999999) {
             ctfBtn.classList.remove("hidden");
           }
         }
       }
     } catch (error) {
-      console.error("[ERROR] Error checking highest score:", error);
+      console.error("[ERROR] Error checking claim eligibility:", error);
     }
   })();
 }
@@ -44,7 +41,7 @@ if (currentSessionId) {
 globalThis.onScoreSubmitted = function (data) {
   currentSessionId = data.sessionId;
   localStorage.setItem("ctf_sessionId", data.sessionId);
-  if (data.isHighest) {
+  if (data.canClaim) {
     ctfBtn.classList.remove("hidden");
   }
 };
