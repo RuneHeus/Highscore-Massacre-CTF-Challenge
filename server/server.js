@@ -5,6 +5,14 @@ import fs from "node:fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { PrismaClient } from "@prisma/client";
+import {
+  validateScoreSubmission,
+  getOrCreatePlayer,
+  handleSessionAndLeaderboard,
+  enforceLeaderboardLimit,
+  canClaimReward,
+  getCookieOptions
+} from "./scoreUtils.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -59,118 +67,40 @@ app.post("/score", async (req, res) => {
   try {
     const { name, score, gameId } = req.body;
 
-    if (!name || typeof score !== "number" || !gameId) {
-      return res.status(400).json({ error: "Invalid data" });
+    // Validate score submission
+    const validation = validateScoreSubmission(name, score, gameId);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
     }
 
-    if (score > 2147483647) {
-      return res.status(400).json({ error: "I only eat signed 32-bit integer." });
-    }else if (score < 0) {
-      return res.status(400).json({ error: "Are you going backwards?🤔" });
-    }
-
-    // Get or create player UUID from cookie
+    // Get or create player
     let playerId = req.cookies.player_uuid;
-    let isNewPlayer = false;
+    const { playerId: finalPlayerId, isNewPlayer } = await getOrCreatePlayer(prisma, playerId);
+    playerId = finalPlayerId;
 
-    if (playerId) {
-      const existingPlayer = await prisma.player.findUnique({
-        where: { player_id: playerId }
-      });
+    // Handle session and leaderboard updates
+    const { sessionId } = await handleSessionAndLeaderboard(
+      prisma,
+      playerId,
+      gameId,
+      name,
+      score
+    );
 
-      if (!existingPlayer) {
-        // Cookie is stale (DB reset). Re-create player with same UUID (of maak nieuwe).
-        const recreated = await prisma.player.create({
-          data: { player_id: playerId }
-        });
-        playerId = recreated.player_id;
-        isNewPlayer = true; // optioneel: cookie opnieuw zetten
-      }
-    } else {
-      const newPlayer = await prisma.player.create({ data: {} });
-      playerId = newPlayer.player_id;
-      isNewPlayer = true;
-    }
-
-    // Check if a session already exists for this player and game
-    let existingSession = await prisma.game_session.findFirst({
-      where: {
-        player_id: playerId,
-        game_id: gameId
-      }
-    });
-
-    let sessionId;
-
-    if (existingSession) {
-      // Update existing session
-      await prisma.game_session.update({
-        where: { session_id: existingSession.session_id },
-        data: {
-          end_time: new Date(),
-          final_score: score,
-          time_played_seconds: 0,
-          status: "finished"
-        }
-      });
-
-      // Update existing leaderboard entry
-      await prisma.leaderboard_entry.update({
-        where: { session_id: existingSession.session_id },
-        data: {
-          player_name: name,
-          score: score,
-          achieved_date: new Date()
-        }
-      });
-
-      sessionId = existingSession.session_id;
-    } else {
-      // Create new session
-      const session = await prisma.game_session.create({
-        data: {
-          player_id: playerId,
-          game_id: gameId,
-          start_time: new Date(),
-          end_time: new Date(),
-          final_score: score,
-          time_played_seconds: 0,
-          status: "finished"
-        }
-      });
-
-      // Create new leaderboard entry
-      await prisma.leaderboard_entry.create({
-        data: {
-          game_id: gameId,
-          session_id: session.session_id,
-          player_name: name,
-          score: score
-        }
-      });
-
-      sessionId = session.session_id;
-    }
-
-    // Determine if THIS score allows claiming the prize (higher than final counselor)
-    const canClaim = score > 9999999;
+    // Determine if THIS score allows claiming the prize
+    const claimable = canClaimReward(score);
 
     if (isNewPlayer) {
-      res.cookie("player_uuid", playerId, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false, // true in production (HTTPS)
-        maxAge: 365 * 24 * 60 * 60 * 1000
-      });
+      res.cookie("player_uuid", playerId, getCookieOptions());
     }
-    
-    //Enforce a max of 100 leaderboard entries
-    await enforceLeaderboardLimit(gameId, 100);
+
+    // Enforce a max of 100 leaderboard entries
+    await enforceLeaderboardLimit(prisma, gameId);
 
     // Respond
     res.json({
       success: true,
-      canClaim,
+      canClaim: claimable,
       sessionId: sessionId
     });
 
@@ -286,26 +216,6 @@ function renderPage(title, listItems) {
       </body>
     </html>
   `;
-}
-
-async function enforceLeaderboardLimit(gameId, limit = 100) {
-  const total = await prisma.leaderboard_entry.count({
-    where: { game_id: gameId }
-  });
-
-  if (total <= limit) return;
-
-  const overflow = total - limit;
-  const oldest = await prisma.leaderboard_entry.findMany({
-    where: { game_id: gameId },
-    orderBy: { achieved_date: "asc" },
-    take: overflow,
-    select: { entry_id: true }
-  });
-
-  await prisma.leaderboard_entry.deleteMany({
-    where: { entry_id: { in: oldest.map(e => e.entry_id) } }
-  });
 }
 
 app.post("/claim-ctf", async (req, res) => {

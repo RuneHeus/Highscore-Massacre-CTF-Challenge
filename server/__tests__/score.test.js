@@ -3,6 +3,16 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 import request from "supertest";
 import cookieParser from "cookie-parser";
+import {
+  validateScoreSubmission,
+  getOrCreatePlayer,
+  handleSessionAndLeaderboard,
+  enforceLeaderboardLimit,
+  canClaimReward,
+  getCookieOptions,
+  SCORE_LIMITS,
+  MESSAGES
+} from "../scoreUtils.js";
 
 // Test database setup - use environment variable or skip if not available
 const testDatabaseUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
@@ -16,134 +26,44 @@ const prisma = hasDatabase ? new PrismaClient({
   }
 }) : null;
 
-// Helper function to enforce leaderboard limit
-async function enforceLeaderboardLimit(gameId, limit = 100) {
-  const total = await prisma.leaderboard_entry.count({
-    where: { game_id: gameId }
-  });
-
-  if (total <= limit) return;
-
-  const overflow = total - limit;
-  const oldest = await prisma.leaderboard_entry.findMany({
-    where: { game_id: gameId },
-    orderBy: { achieved_date: "asc" },
-    take: overflow,
-    select: { entry_id: true }
-  });
-
-  await prisma.leaderboard_entry.deleteMany({
-    where: { entry_id: { in: oldest.map(e => e.entry_id) } }
-  });
-}
-
 // Handler functions
 const handlePostScore = async (req, res) => {
   try {
     const { name, score, gameId } = req.body;
 
-    if (!name || typeof score !== "number" || !gameId) {
-      return res.status(400).json({ error: "Invalid data" });
+    // Validate score submission
+    const validation = validateScoreSubmission(name, score, gameId);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
     }
 
-    if (score > 2147483647) {
-      return res.status(400).json({ error: "I only eat signed 32-bit integer." });
-    } else if (score < 0) {
-      return res.status(400).json({ error: "Are you going backwards?🤔" });
-    }
-
+    // Get or create player
     let playerId = req.cookies.player_uuid;
-    let isNewPlayer = false;
+    const { playerId: finalPlayerId, isNewPlayer } = await getOrCreatePlayer(prisma, playerId);
+    playerId = finalPlayerId;
 
-    if (playerId) {
-      const existingPlayer = await prisma.player.findUnique({
-        where: { player_id: playerId }
-      });
+    // Handle session and leaderboard updates
+    const { sessionId } = await handleSessionAndLeaderboard(
+      prisma,
+      playerId,
+      gameId,
+      name,
+      score
+    );
 
-      if (!existingPlayer) {
-        const recreated = await prisma.player.create({
-          data: { player_id: playerId }
-        });
-        playerId = recreated.player_id;
-        isNewPlayer = true;
-      }
-    } else {
-      const newPlayer = await prisma.player.create({ data: {} });
-      playerId = newPlayer.player_id;
-      isNewPlayer = true;
-    }
-
-    let existingSession = await prisma.game_session.findFirst({
-      where: {
-        player_id: playerId,
-        game_id: gameId
-      }
-    });
-
-    let sessionId;
-
-    if (existingSession) {
-      await prisma.game_session.update({
-        where: { session_id: existingSession.session_id },
-        data: {
-          end_time: new Date(),
-          final_score: score,
-          time_played_seconds: 0,
-          status: "finished"
-        }
-      });
-
-      await prisma.leaderboard_entry.update({
-        where: { session_id: existingSession.session_id },
-        data: {
-          player_name: name,
-          score: score,
-          achieved_date: new Date()
-        }
-      });
-
-      sessionId = existingSession.session_id;
-    } else {
-      const session = await prisma.game_session.create({
-        data: {
-          player_id: playerId,
-          game_id: gameId,
-          start_time: new Date(),
-          end_time: new Date(),
-          final_score: score,
-          time_played_seconds: 0,
-          status: "finished"
-        }
-      });
-
-      await prisma.leaderboard_entry.create({
-        data: {
-          game_id: gameId,
-          session_id: session.session_id,
-          player_name: name,
-          score: score
-        }
-      });
-
-      sessionId = session.session_id;
-    }
-
-    const canClaim = score > 9999999;
+    // Determine if score qualifies for reward
+    const claimable = canClaimReward(score);
 
     if (isNewPlayer) {
-      res.cookie("player_uuid", playerId, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: 365 * 24 * 60 * 60 * 1000
-      });
+      res.cookie("player_uuid", playerId, getCookieOptions());
     }
 
-    await enforceLeaderboardLimit(gameId, 100);
+    // Enforce a max of 100 leaderboard entries
+    await enforceLeaderboardLimit(prisma, gameId);
 
     res.json({
       success: true,
-      canClaim,
+      canClaim: claimable,
       sessionId: sessionId
     });
   } catch (err) {
