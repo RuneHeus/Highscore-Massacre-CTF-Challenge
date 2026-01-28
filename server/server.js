@@ -11,7 +11,10 @@ import {
   handleSessionAndLeaderboard,
   enforceLeaderboardLimit,
   canClaimReward,
-  getCookieOptions
+  getCookieOptions,
+  getLeaderboard,
+  validateCtfClaim,
+  getCTFFlag
 } from "./scoreUtils.js";
 
 const app = express();
@@ -111,22 +114,14 @@ app.post("/score", async (req, res) => {
 });
 
 app.get("/leaderboard/:gameId", async (req, res) => {
-  const gameId = Number(req.params.gameId);
-
-  const entries = await prisma.leaderboard_entry.findMany({
-    where: { game_id: gameId },
-    orderBy: { score: "desc" }
-  });
-
-  const leaderboard = entries.map((entry, index) => ({
-    rank: index + 1,
-    player_name: entry.player_name,
-    score: entry.score,
-    achieved_date: entry.achieved_date,
-    session_id: entry.session_id
-  }));
-
-  res.json(leaderboard);
+  try {
+    const gameId = Number(req.params.gameId);
+    const leaderboard = await getLeaderboard(prisma, gameId);
+    res.json(leaderboard);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.get("/download/:filename", (req, res) => {
@@ -223,7 +218,7 @@ app.post("/claim-ctf", async (req, res) => {
     const { sessionId, gameId } = req.body;
 
     if (!sessionId || !gameId) {
-      return res.status(400).json({ error: "Invalid request" });
+      return res.status(400).json({ success: false, error: "Invalid request" });
     }
 
     const entry = await prisma.leaderboard_entry.findUnique({
@@ -231,7 +226,7 @@ app.post("/claim-ctf", async (req, res) => {
     });
 
     if (!entry || entry.game_id !== gameId) {
-      return res.status(403).json({ error: "Session not found" });
+      return res.status(403).json({ success: false, error: "Session not found" });
     }
 
     // Require this session’s score to surpass the final counselor score
@@ -251,7 +246,7 @@ app.post("/claim-ctf", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
 

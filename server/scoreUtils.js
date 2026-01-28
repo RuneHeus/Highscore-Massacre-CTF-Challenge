@@ -186,3 +186,63 @@ export function getCookieOptions() {
     maxAge: 365 * 24 * 60 * 60 * 1000
   };
 }
+
+/**
+ * Get leaderboard entries for a game
+ * @param {Object} prisma - Prisma client instance
+ * @param {number} gameId - Game ID
+ * @returns {Array} Leaderboard entries with rank
+ */
+export async function getLeaderboard(prisma, gameId) {
+  const entries = await prisma.leaderboard_entry.findMany({
+    where: { game_id: gameId },
+    orderBy: { score: "desc" }
+  });
+
+  return entries.map((entry, index) => ({
+    rank: index + 1,
+    player_name: entry.player_name,
+    score: entry.score,
+    achieved_date: entry.achieved_date,
+    session_id: entry.session_id
+  }));
+}
+
+/**
+ * Validate and process CTF reward claim
+ * @param {Object} prisma - Prisma client instance
+ * @param {number} sessionId - Session ID
+ * @param {number} gameId - Game ID
+ * @returns {Object} {valid: boolean, error?: string, message?: string, statusCode?: number, entry?: Object}
+ */
+export async function validateCtfClaim(prisma, sessionId, gameId) {
+  if (!sessionId || !gameId) {
+    return { valid: false, error: "Invalid request", statusCode: 400 };
+  }
+
+  const entry = await prisma.leaderboard_entry.findUnique({
+    where: { session_id: sessionId }
+  });
+
+  if (!entry || entry.game_id !== gameId) {
+    return { valid: false, error: "Session not found", statusCode: 403 };
+  }
+
+  if (entry.score <= SCORE_LIMITS.CTF_THRESHOLD) {
+    return {
+      valid: false,
+      message: "Score too low for the reward.",
+      statusCode: 403
+    };
+  }
+
+  return { valid: true, entry };
+}
+
+/**
+ * Get CTF flag
+ * @returns {string} CTF flag
+ */
+export function getCTFFlag() {
+  return "CTF{Ki_kI_KI_Ma_MA_mA}";
+}

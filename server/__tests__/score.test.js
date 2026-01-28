@@ -10,6 +10,9 @@ import {
   enforceLeaderboardLimit,
   canClaimReward,
   getCookieOptions,
+  getLeaderboard,
+  validateCtfClaim,
+  getCTFFlag,
   SCORE_LIMITS,
   MESSAGES
 } from "../scoreUtils.js";
@@ -73,56 +76,40 @@ const handlePostScore = async (req, res) => {
 };
 
 const handleGetLeaderboard = async (req, res) => {
-  const gameId = Number(req.params.gameId);
-
-  const entries = await prisma.leaderboard_entry.findMany({
-    where: { game_id: gameId },
-    orderBy: { score: "desc" }
-  });
-
-  const leaderboard = entries.map((entry, index) => ({
-    rank: index + 1,
-    player_name: entry.player_name,
-    score: entry.score,
-    achieved_date: entry.achieved_date,
-    session_id: entry.session_id
-  }));
-
-  res.json(leaderboard);
+  try {
+    const gameId = Number(req.params.gameId);
+    const leaderboard = await getLeaderboard(prisma, gameId);
+    res.json(leaderboard);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 const handleClaimCtf = async (req, res) => {
   try {
     const { sessionId, gameId } = req.body;
 
-    if (!sessionId || !gameId) {
-      return res.status(400).json({ error: "Invalid request" });
+    const validation = await validateCtfClaim(prisma, sessionId, gameId);
+    if (!validation.valid) {
+      const statusCode = validation.statusCode || 400;
+      const response = { success: false };
+      if (validation.message) {
+        response.message = validation.message;
+      } else if (validation.error) {
+        response.error = validation.error;
+      }
+      return res.status(statusCode).json(response);
     }
 
-    const entry = await prisma.leaderboard_entry.findUnique({
-      where: { session_id: sessionId }
-    });
-
-    if (!entry || entry.game_id !== gameId) {
-      return res.status(403).json({ error: "Session not found" });
-    }
-
-    if (entry.score <= 9_999_999) {
-      return res.status(403).json({
-        success: false,
-        message: "Score too low for the reward."
-      });
-    }
-
-    const CTF_KEY = "CTF{Ki_kI_KI_Ma_MA_mA}";
-
+    const flag = getCTFFlag();
     res.json({
       success: true,
-      flag: CTF_KEY
+      flag: flag
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
 
