@@ -6,7 +6,7 @@ export default defineConfig({
     environment: "node",
     include: [
       "src/**/*.test.js",
-      "server/__tests__/score.test.js"
+      "server/__tests__/**/*.test.js"
     ],
     exclude: [
       "node_modules/",

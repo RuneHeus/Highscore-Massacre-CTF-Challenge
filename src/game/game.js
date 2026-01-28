@@ -54,6 +54,13 @@ export function initGame(canvas) {
       y: canvas.height - 96 * scale,
       height: 96 * scale
     };
+    console.log('[RESIZE DEBUG]', {
+      canvasWidth: canvas.width,
+      canvasHeight: canvas.height,
+      scale: scale,
+      groundY: ground.y,
+      groundHeight: ground.height
+    });
 
     if (player) {
       player.width = 80 * scale;
@@ -61,8 +68,18 @@ export function initGame(canvas) {
       player.hbOffsetX = (player.width - 55 * scale) / 2;
       player.hbWidth = 55 * scale;
       player.hbHeight = 110 * scale;
+      player.visualOffsetY = player.height - player.hbHeight;  // RECALCULATE THIS!
       player.x = canvas.width * 0.3125;
       player.y = ground.y - player.height + player.visualOffsetY;
+      console.log('[PLAYER RESIZE DEBUG]', {
+        playerWidth: player.width,
+        playerHeight: player.height,
+        hbHeight: player.hbHeight,
+        visualOffsetY: player.visualOffsetY,
+        playerX: player.x,
+        playerY: player.y,
+        calculation: `${ground.y} - ${player.height} + ${player.visualOffsetY} = ${player.y}`
+      });
     }
 
     // Scale existing obstacles

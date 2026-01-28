@@ -59,8 +59,7 @@ export function setupInput(state, player, resetGame, scale) {
   let jumpHoldTime = 0;
   const JUMP_CONTROL_TIME = 90;
   const JUMP_VELOCITY = -900 * scale;
-  const DROP_VELOCITY = -120;
-
+  const DROP_VELOCITY = -120;  console.log('[INPUT DEBUG]', { scale, JUMP_VELOCITY, DROP_VELOCITY });
   document.addEventListener("keydown", (e) => {
 
     if (state.showSaveOverlay) {

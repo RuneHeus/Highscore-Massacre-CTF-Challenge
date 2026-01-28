@@ -1,4 +1,4 @@
-name: SonarQube Analysis
+name: Integration Tests with Docker
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  sonarqube:
+  integration-tests:
     runs-on: ubuntu-latest
 
     services:
@@ -28,8 +28,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -47,26 +45,15 @@ jobs:
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
 
-      - name: Run tests
-        run: npm test -- --run
-        env:
-          DATABASE_URL: postgresql://game:game@localhost:5432/game_db
-
       - name: Run integration tests
         run: npm run test:all
         env:
           DATABASE_URL: postgresql://game:game@localhost:5432/game_db
 
-      - name: Build project
-        run: npm run build
-
-      - name: Prisma generate
-        run: npx prisma generate
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          projectBaseDir: .
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          name: test-results
+          path: coverage/
+          retention-days: 30
