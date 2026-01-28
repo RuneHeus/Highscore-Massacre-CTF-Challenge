@@ -157,7 +157,7 @@ export function initGame(canvas) {
     if (state.gameState === "running") {
       state.baseSpeed += state.speedIncrease * delta;
 
-      updatePlayer(player, delta, ground, 3500, scale);
+      updatePlayer(player, delta, ground, 4000, scale);
       updatePlayerAnimation(player, delta);
       updateObstacles(
         state.obstacles,
