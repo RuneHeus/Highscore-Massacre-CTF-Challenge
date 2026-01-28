@@ -34,6 +34,12 @@ const allowedOrigins = new Set([
   "http://localhost:3000"
 ]);
 
+// Helper to handle errors consistently
+const handleError = (res, err, statusCode = 500) => {
+  console.error(err);
+  res.status(statusCode).json({ success: false, error: "Internal server error" });
+};
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -108,8 +114,7 @@ app.post("/score", async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    handleError(res, err);
   }
 });
 
@@ -119,8 +124,7 @@ app.get("/leaderboard/:gameId", async (req, res) => {
     const leaderboard = await getLeaderboard(prisma, gameId);
     res.json(leaderboard);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    handleError(res, err);
   }
 });
 
@@ -245,8 +249,7 @@ app.post("/claim-ctf", async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Internal server error" });
+    handleError(res, err);
   }
 });
 
