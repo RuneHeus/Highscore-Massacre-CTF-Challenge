@@ -5,17 +5,7 @@ import fs from "node:fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { PrismaClient } from "@prisma/client";
-import {
-  validateScoreSubmission,
-  getOrCreatePlayer,
-  handleSessionAndLeaderboard,
-  enforceLeaderboardLimit,
-  canClaimReward,
-  getCookieOptions,
-  getLeaderboard,
-  validateCtfClaim,
-  getCTFFlag
-} from "./scoreUtils.js";
+import { createScoreHandlers } from "./scoreHandlers.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -72,61 +62,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/score", async (req, res) => {
-  try {
-    const { name, score, gameId } = req.body;
+const handlers = createScoreHandlers(prisma, { onError: handleError });
 
-    // Validate score submission
-    const validation = validateScoreSubmission(name, score, gameId);
-    if (!validation.valid) {
-      return res.status(400).json({ error: validation.error });
-    }
+app.post("/score", (req, res) => handlers.handlePostScore(req, res));
 
-    // Get or create player
-    let playerId = req.cookies.player_uuid;
-    const { playerId: finalPlayerId, isNewPlayer } = await getOrCreatePlayer(prisma, playerId);
-    playerId = finalPlayerId;
-
-    // Handle session and leaderboard updates
-    const { sessionId } = await handleSessionAndLeaderboard(
-      prisma,
-      playerId,
-      gameId,
-      name,
-      score
-    );
-
-    // Determine if THIS score allows claiming the prize
-    const claimable = canClaimReward(score);
-
-    if (isNewPlayer) {
-      res.cookie("player_uuid", playerId, getCookieOptions());
-    }
-
-    // Enforce a max of 100 leaderboard entries
-    await enforceLeaderboardLimit(prisma, gameId);
-
-    // Respond
-    res.json({
-      success: true,
-      canClaim: claimable,
-      sessionId: sessionId
-    });
-
-  } catch (err) {
-    handleError(res, err);
-  }
-});
-
-app.get("/leaderboard/:gameId", async (req, res) => {
-  try {
-    const gameId = Number(req.params.gameId);
-    const leaderboard = await getLeaderboard(prisma, gameId);
-    res.json(leaderboard);
-  } catch (err) {
-    handleError(res, err);
-  }
-});
+app.get("/leaderboard/:gameId", (req, res) => handlers.handleGetLeaderboard(req, res));
 
 app.get("/download/:filename", (req, res) => {
   const filename = req.params.filename;
@@ -217,41 +157,7 @@ function renderPage(title, listItems) {
   `;
 }
 
-app.post("/claim-ctf", async (req, res) => {
-  try {
-    const { sessionId, gameId } = req.body;
-
-    if (!sessionId || !gameId) {
-      return res.status(400).json({ success: false, error: "Invalid request" });
-    }
-
-    const entry = await prisma.leaderboard_entry.findUnique({
-      where: { session_id: sessionId }
-    });
-
-    if (!entry || entry.game_id !== gameId) {
-      return res.status(403).json({ success: false, error: "Session not found" });
-    }
-
-    // Require this session’s score to surpass the final counselor score
-    if (entry.score <= 9_999_999) {
-      return res.status(403).json({
-        success: false,
-        message: "Score too low for the reward."
-      });
-    }
-
-    const CTF_KEY = "CTF{Ki_kI_KI_Ma_MA_mA}";
-
-    res.json({
-      success: true,
-      flag: CTF_KEY
-    });
-
-  } catch (err) {
-    handleError(res, err);
-  }
-});
+app.post("/claim-ctf", (req, res) => handlers.handleClaimCtf(req, res));
 
 const DIST_PATH = path.join(__dirname, "../dist");
 

@@ -3,19 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 import request from "supertest";
 import cookieParser from "cookie-parser";
-import {
-  validateScoreSubmission,
-  getOrCreatePlayer,
-  handleSessionAndLeaderboard,
-  enforceLeaderboardLimit,
-  canClaimReward,
-  getCookieOptions,
-  getLeaderboard,
-  validateCtfClaim,
-  getCTFFlag,
-  SCORE_LIMITS,
-  MESSAGES
-} from "../scoreUtils.js";
+import { createScoreHandlers } from "../scoreHandlers.js";
 
 // Test database setup - use environment variable or skip if not available
 const testDatabaseUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
@@ -29,92 +17,13 @@ const prisma = hasDatabase ? new PrismaClient({
   }
 }) : null;
 
-// Reusable handler factory for consistency
-const createHandlers = (prisma) => ({
-  async handlePostScore(req, res) {
-    try {
-      const { name, score, gameId } = req.body;
-      const validation = validateScoreSubmission(name, score, gameId);
-      if (!validation.valid) {
-        return res.status(400).json({ error: validation.error });
-      }
-
-      let playerId = req.cookies.player_uuid;
-      const { playerId: finalPlayerId, isNewPlayer } = await getOrCreatePlayer(prisma, playerId);
-      playerId = finalPlayerId;
-
-      const { sessionId } = await handleSessionAndLeaderboard(
-        prisma,
-        playerId,
-        gameId,
-        name,
-        score
-      );
-
-      const claimable = canClaimReward(score);
-
-      if (isNewPlayer) {
-        res.cookie("player_uuid", playerId, getCookieOptions());
-      }
-
-      await enforceLeaderboardLimit(prisma, gameId);
-
-      res.json({
-        success: true,
-        canClaim: claimable,
-        sessionId: sessionId
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, error: "Internal server error" });
-    }
-  },
-
-  async handleGetLeaderboard(req, res) {
-    try {
-      const gameId = Number(req.params.gameId);
-      const leaderboard = await getLeaderboard(prisma, gameId);
-      res.json(leaderboard);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, error: "Internal server error" });
-    }
-  },
-
-  async handleClaimCtf(req, res) {
-    try {
-      const { sessionId, gameId } = req.body;
-      const validation = await validateCtfClaim(prisma, sessionId, gameId);
-      if (!validation.valid) {
-        const statusCode = validation.statusCode || 400;
-        const response = { success: false };
-        if (validation.message) {
-          response.message = validation.message;
-        } else if (validation.error) {
-          response.error = validation.error;
-        }
-        return res.status(statusCode).json(response);
-      }
-
-      const flag = getCTFFlag();
-      res.json({
-        success: true,
-        flag: flag
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, error: "Internal server error" });
-    }
-  }
-});
-
 // Mini server for testing
 function createTestServer() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
 
-  const handlers = createHandlers(prisma);
+  const handlers = createScoreHandlers(prisma);
   app.post("/score", (req, res) => handlers.handlePostScore(req, res));
   app.get("/leaderboard/:gameId", (req, res) => handlers.handleGetLeaderboard(req, res));
   app.post("/claim-ctf", (req, res) => handlers.handleClaimCtf(req, res));
