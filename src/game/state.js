@@ -3,7 +3,7 @@ export const state = {
   score: 0,
   highScore: 0,
   baseSpeed: 450,
-  speedIncrease: 5,
+  speedIncrease: 15,
   lastTime: 0,
   obstacles: [],
   groundOffsetX: 0,
