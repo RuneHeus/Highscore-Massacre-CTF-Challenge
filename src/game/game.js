@@ -16,7 +16,6 @@ export function initGame(canvas) {
   ctx.imageSmoothingEnabled = false;
 
   document.addEventListener("visibilitychange", () => {
-    console.log("[DEBUG] visibilitychange event: ", document.hidden);
     if (document.hidden && state.gameState === "running") {
       state.gameState = "gameover";
       state.showSaveOverlay = false;
@@ -54,13 +53,6 @@ export function initGame(canvas) {
       y: canvas.height - 96 * scale,
       height: 96 * scale
     };
-    console.log('[RESIZE DEBUG]', {
-      canvasWidth: canvas.width,
-      canvasHeight: canvas.height,
-      scale: scale,
-      groundY: ground.y,
-      groundHeight: ground.height
-    });
 
     if (player) {
       player.width = 80 * scale;
@@ -71,15 +63,6 @@ export function initGame(canvas) {
       player.visualOffsetY = player.height - player.hbHeight;  // RECALCULATE THIS!
       player.x = canvas.width * 0.3125;
       player.y = ground.y - player.height + player.visualOffsetY;
-      console.log('[PLAYER RESIZE DEBUG]', {
-        playerWidth: player.width,
-        playerHeight: player.height,
-        hbHeight: player.hbHeight,
-        visualOffsetY: player.visualOffsetY,
-        playerX: player.x,
-        playerY: player.y,
-        calculation: `${ground.y} - ${player.height} + ${player.visualOffsetY} = ${player.y}`
-      });
     }
 
     // Scale existing obstacles
@@ -172,7 +155,6 @@ export function initGame(canvas) {
       for (const obs of state.obstacles) {
         if (checkCollision(player, obs)) {
           state.gameState = "gameover";
-          console.log("Game Over! Final Score:", Math.floor(state.score));
           if (state.score >= 200) {
             state.showSaveOverlay = true;
           }

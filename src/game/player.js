@@ -5,17 +5,6 @@ export function createPlayer(scale, groundY, canvasWidth) {
   const hbHeight = 110 * scale;
   const visualOffsetY = height - hbHeight;
   const playerY = groundY - height;
-  console.log('[CREATE PLAYER DEBUG]', {
-    scale,
-    groundY,
-    canvasWidth,
-    height,
-    width,
-    hbHeight,
-    visualOffsetY,
-    playerY,
-    calculation: `${groundY} - ${height} = ${playerY}`
-  });
   return {
     x: canvasWidth * 0.3125,
     y: groundY - height,

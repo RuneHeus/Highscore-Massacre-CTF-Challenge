@@ -12,9 +12,6 @@ const list = document.getElementById("leaderboard-list");
 
 if (currentSessionId) {
   await (async () => {
-    console.log("[DEBUG] checkIfEligibleForClaim called");
-    console.log("[DEBUG] currentSessionId:", currentSessionId);
-
     try {
       const res = await fetch("/leaderboard/1");
       const data = await res.json();
@@ -33,7 +30,7 @@ if (currentSessionId) {
         }
       }
     } catch (error) {
-      console.error("[ERROR] Error checking claim eligibility:", error);
+      // Silently fail - claim button won't show if error
     }
   })();
 }
@@ -78,11 +75,12 @@ ctfBtn?.addEventListener("click", async () => {
     
     alert(`Well done! Take this key ${data.flag} and enjoy the free book`);
 
-    globalThis.location.href =
-      "/lore/book?path=public/lore/mask_of_jason_manuscript_v.4.pdf";
+    window.open(
+      "/lore/book?path=public/lore/mask_of_jason_manuscript_v.4.pdf",
+      "_blank"
+    );
 
   } catch (err) {
-    console.error(err);
     alert("Something went wrong in the woods...");
   }
 });

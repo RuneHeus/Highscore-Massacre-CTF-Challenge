@@ -43,14 +43,13 @@ async function submitScore(state) {
     const data = await res.json();
 
     if (data.success && globalThis.onScoreSubmitted) {
-      console.log("Score submitted successfully", data);
       globalThis.onScoreSubmitted(data);
     }
 
     state.showSaveOverlay = false;
     state.gameState = "gameover";
   } catch (err) {
-    console.error("Failed to submit score", err);
+    // Silently handle error
   }
 }
 
@@ -59,7 +58,7 @@ export function setupInput(state, player, resetGame, scale) {
   let jumpHoldTime = 0;
   const JUMP_CONTROL_TIME = 90;
   const JUMP_VELOCITY = -900 * scale;
-  const DROP_VELOCITY = -120;  console.log('[INPUT DEBUG]', { scale, JUMP_VELOCITY, DROP_VELOCITY });
+  const DROP_VELOCITY = -120;
   document.addEventListener("keydown", (e) => {
 
     if (state.showSaveOverlay) {
