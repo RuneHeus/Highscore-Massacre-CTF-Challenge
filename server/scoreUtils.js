@@ -155,7 +155,10 @@ export async function enforceLeaderboardLimit(prisma, gameId, limit = MESSAGES.L
 
   const overflow = total - limit;
   const oldest = await prisma.leaderboard_entry.findMany({
-    where: { game_id: gameId },
+    where: { 
+      game_id: gameId,
+      player_name: { not: "FinalCounselor" }
+    },
     orderBy: { achieved_date: "asc" },
     take: overflow,
     select: { entry_id: true }
@@ -195,18 +198,68 @@ export function getCookieOptions() {
  * @returns {Array} Leaderboard entries with rank
  */
 export async function getLeaderboard(prisma, gameId) {
+  const orderBy = [
+    { score: "desc" },
+    { achieved_date: "asc" },
+    { entry_id: "asc" }
+  ];
+
   const entries = await prisma.leaderboard_entry.findMany({
     where: { game_id: gameId },
-    orderBy: { score: "desc" }
+    orderBy,
+    take: MESSAGES.LEADERBOARD_LIMIT
   });
 
-  return entries.map((entry, index) => ({
+  const finalCounselor = await prisma.leaderboard_entry.findFirst({
+    where: { game_id: gameId, player_name: "FinalCounselor" },
+    orderBy
+  });
+
+  const hasFinalCounselor = finalCounselor
+    ? entries.some(entry => entry.session_id === finalCounselor.session_id)
+    : false;
+
+  let rankedEntries = entries.map((entry, index) => ({
     rank: index + 1,
     player_name: entry.player_name,
     score: entry.score,
     achieved_date: entry.achieved_date,
     session_id: entry.session_id
   }));
+
+  if (finalCounselor && !hasFinalCounselor) {
+    const higherCount = await prisma.leaderboard_entry.count({
+      where: {
+        game_id: gameId,
+        OR: [
+          { score: { gt: finalCounselor.score } },
+          {
+            score: finalCounselor.score,
+            achieved_date: { lt: finalCounselor.achieved_date }
+          },
+          {
+            score: finalCounselor.score,
+            achieved_date: finalCounselor.achieved_date,
+            entry_id: { lt: finalCounselor.entry_id }
+          }
+        ]
+      }
+    });
+
+    if (rankedEntries.length >= MESSAGES.LEADERBOARD_LIMIT) {
+      rankedEntries = rankedEntries.slice(0, MESSAGES.LEADERBOARD_LIMIT - 1);
+    }
+
+    rankedEntries.push({
+      rank: higherCount + 1,
+      player_name: finalCounselor.player_name,
+      score: finalCounselor.score,
+      achieved_date: finalCounselor.achieved_date,
+      session_id: finalCounselor.session_id
+    });
+  }
+
+  return rankedEntries;
 }
 
 /**

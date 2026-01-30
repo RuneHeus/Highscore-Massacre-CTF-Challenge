@@ -103,11 +103,31 @@ async function loadLeaderboard() {
 
     list.innerHTML = "";
 
-    data.forEach((entry, index) => {
+    const MAX_ENTRIES = 100;
+    const sorted = data
+      .slice()
+      .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
+
+    const topEntries = sorted.slice(0, MAX_ENTRIES);
+    const finalCounselor = sorted.find(
+      entry => entry.player_name === "FinalCounselor"
+    );
+    const finalInTop = finalCounselor
+      ? topEntries.some(entry => entry.session_id === finalCounselor.session_id)
+      : false;
+
+    const entriesToRender = finalCounselor && !finalInTop
+      ? [...topEntries, finalCounselor]
+      : topEntries;
+
+    entriesToRender.forEach((entry, index) => {
       const row = document.createElement("div");
       row.className = "leaderboard-entry";
+      if (entry.player_name === "FinalCounselor") {
+        row.classList.add("final-counselor");
+      }
       row.innerHTML = `
-        <span>#${index + 1} ${entry.player_name}</span>
+        <span>#${entry.rank ?? index + 1} ${entry.player_name}</span>
         <span>${entry.score}</span>
       `;
       list.appendChild(row);
