@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
-// Score validation constants
 export const SCORE_LIMITS = {
-  MAX: 2147483647,  // signed 32-bit integer max
+  MAX: 2147483647,
   MIN: 0,
   CTF_THRESHOLD: 9999999
 };
@@ -15,7 +14,6 @@ export const MESSAGES = {
 };
 
 /**
- * Validate score submission
  * @param {string} name - Player name
  * @param {number} score - Score value
  * @param {number} gameId - Game ID
@@ -87,26 +85,29 @@ export async function handleSessionAndLeaderboard(prisma, playerId, gameId, name
   let sessionId;
 
   if (existingSession) {
-    // Update existing session
-    await prisma.game_session.update({
-      where: { session_id: existingSession.session_id },
-      data: {
-        end_time: new Date(),
-        final_score: score,
-        time_played_seconds: 0,
-        status: "finished"
-      }
-    });
+    // Only update if new score is higher than existing score
+    if (score > existingSession.final_score) {
+      // Update existing session
+      await prisma.game_session.update({
+        where: { session_id: existingSession.session_id },
+        data: {
+          end_time: new Date(),
+          final_score: score,
+          time_played_seconds: 0,
+          status: "finished"
+        }
+      });
 
-    // Update existing leaderboard entry
-    await prisma.leaderboard_entry.update({
-      where: { session_id: existingSession.session_id },
-      data: {
-        player_name: name,
-        score: score,
-        achieved_date: new Date()
-      }
-    });
+      // Update existing leaderboard entry
+      await prisma.leaderboard_entry.update({
+        where: { session_id: existingSession.session_id },
+        data: {
+          player_name: name,
+          score: score,
+          achieved_date: new Date()
+        }
+      });
+    }
 
     sessionId = existingSession.session_id;
   } else {
@@ -140,7 +141,7 @@ export async function handleSessionAndLeaderboard(prisma, playerId, gameId, name
 }
 
 /**
- * Enforce maximum leaderboard entries
+ * maximum leaderboard entries
  * @param {Object} prisma - Prisma client instance
  * @param {number} gameId - Game ID
  * @param {number} limit - Maximum entries (default: 100)
@@ -182,7 +183,7 @@ export function getCookieOptions() {
   return {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,  // true in production (HTTPS)
+    secure: false,
     maxAge: 365 * 24 * 60 * 60 * 1000
   };
 }
